@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
+import { Tabs, tabTriggerClassName } from "@/components/ui/tabs";
 import { RANK_TYPES, RANK_TYPE_LABELS, type RankType } from "@/lib/constants";
-import { cn } from "@/lib/utils";
 
 interface RankTypeTabsProps {
   activeType: RankType;
@@ -22,7 +22,7 @@ export function RankTypeTabs({
   const date = searchParams.get("date");
 
   return (
-    <div className="inline-flex rounded-xl border border-zinc-200 bg-zinc-50 p-1">
+    <Tabs>
       {RANK_TYPES.map((type) => {
         let href = "";
         if (mode === "query") {
@@ -40,17 +40,12 @@ export function RankTypeTabs({
           <Link
             key={type}
             href={href}
-            className={cn(
-              "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
-              activeType === type
-                ? "bg-white text-zinc-900 shadow-sm"
-                : "text-zinc-500 hover:text-zinc-900",
-            )}
+            className={tabTriggerClassName(activeType === type)}
           >
             {RANK_TYPE_LABELS[type]}
           </Link>
         );
       })}
-    </div>
+    </Tabs>
   );
 }

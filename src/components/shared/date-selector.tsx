@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Select } from "@/components/ui/input";
+import { SelectMenu } from "@/components/ui/select-menu";
 
 interface DateSelectorProps {
   dates: string[];
@@ -15,24 +15,18 @@ export function DateSelector({ dates, currentDate }: DateSelectorProps) {
 
   return (
     <div className="flex items-center gap-3">
-      <label htmlFor="date" className="text-sm text-zinc-500">
-        数据日期
-      </label>
-      <Select
-        id="date"
+      <span className="text-sm text-slate-500">数据日期</span>
+      <SelectMenu
         value={currentDate}
-        onChange={(event) => {
+        options={dates.map((item) => ({ value: item, label: item }))}
+        placeholder="选择日期"
+        triggerClassName="min-w-[11rem]"
+        onValueChange={(date) => {
           const params = new URLSearchParams(searchParams.toString());
-          params.set("date", event.target.value);
+          params.set("date", date);
           router.push(`?${params.toString()}`);
         }}
-      >
-        {dates.map((item) => (
-          <option key={item} value={item}>
-            {item}
-          </option>
-        ))}
-      </Select>
+      />
     </div>
   );
 }
