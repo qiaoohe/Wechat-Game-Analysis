@@ -1,26 +1,51 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  /* 品牌红：接近 Logo，导航用浅底避免过重 */
+  --primary: #e04d4e;
+  --primary-hover: #c94445;
+  --primary-soft: #fff5f5;
+  --primary-muted: #f5caca;
+  --primary-foreground: #ffffff;
+  --primary-text: #c93a3b;
+  --primary-ring: #f0a8a8;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-brand: var(--primary);
+  --color-brand-hover: var(--primary-hover);
+  --color-brand-soft: var(--primary-soft);
+  --color-brand-muted: var(--primary-muted);
+  --color-brand-foreground: var(--primary-foreground);
+  --color-brand-text: var(--primary-text);
+  --color-brand-ring: var(--primary-ring);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+table {
+  border-collapse: collapse;
 }
