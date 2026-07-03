@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { RisingTable } from "@/components/rankings/rising-table";
 import { RankTypeTabs } from "@/components/rankings/rank-type-tabs";
 import { EmptyState } from "@/components/shared/empty-state";
+import { TabsLoadingFallback } from "@/components/shared/page-loading";
 import { PageHeader } from "@/components/shared/page-header";
 import { PageMetaLine } from "@/components/shared/page-meta-line";
 import {
@@ -37,7 +38,7 @@ export default async function RisingPage({ searchParams }: RisingPageProps) {
       />
 
       <div className="mb-4">
-        <Suspense fallback={null}>
+        <Suspense fallback={<TabsLoadingFallback />}>
           <RankTypeTabs activeType={rankType} mode="query" />
         </Suspense>
       </div>

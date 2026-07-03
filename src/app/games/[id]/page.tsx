@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { RankTypeTabs } from "@/components/rankings/rank-type-tabs";
 import { GameAvatar } from "@/components/shared/game-avatar";
 import { EllipsisText } from "@/components/shared/ellipsis-text";
+import { TabsLoadingFallback } from "@/components/shared/page-loading";
 import { RankLabelBadges } from "@/components/rankings/rank-label-badges";
 import { TrendChart } from "@/components/rankings/trend-chart";
 import {
@@ -133,7 +134,7 @@ export default async function GamePage({
           </div>
 
           <div className="w-full shrink-0 md:ml-auto md:w-auto md:pt-1">
-            <Suspense fallback={null}>
+            <Suspense fallback={<TabsLoadingFallback />}>
               <RankTypeTabs activeType={rankType} mode="query" />
             </Suspense>
           </div>

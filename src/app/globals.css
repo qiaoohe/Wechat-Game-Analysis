@@ -97,4 +97,49 @@ table thead th {
   .mobile-nav-panel-closed {
     transform: none;
   }
+
+  .route-loading-bar-active {
+    animation: none;
+    transform: scaleX(1);
+  }
+}
+
+/* 路由切换顶部进度条 */
+@keyframes route-loading-progress {
+  0% {
+    transform: scaleX(0);
+  }
+
+  20% {
+    transform: scaleX(0.35);
+  }
+
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+.route-loading-bar {
+  transform: scaleX(0);
+  transform-origin: left center;
+  opacity: 0;
+}
+
+.route-loading-bar-active {
+  opacity: 1;
+  animation: route-loading-progress 0.7s ease-out forwards;
+}
+
+.page-loading-enter {
+  animation: page-loading-fade-in 0.2s ease-out;
+}
+
+@keyframes page-loading-fade-in {
+  from {
+    opacity: 0.6;
+  }
+
+  to {
+    opacity: 1;
+  }
 }

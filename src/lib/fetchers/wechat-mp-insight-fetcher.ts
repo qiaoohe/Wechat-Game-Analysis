@@ -94,6 +94,14 @@ function hasHotSearchRows(rows: MpStatRow[]) {
   return Boolean(first?.[0]?.value && first?.[1]?.value);
 }
 
+function isMpTimeRangeError(error: unknown) {
+  return (
+    error instanceof Error &&
+    (error.message.includes("-10016005") ||
+      error.message.includes("时间范围填写错误"))
+  );
+}
+
 async function fetchStatRows(
   statType: number,
   keyFieldIds: number[],
@@ -101,15 +109,23 @@ async function fetchStatRows(
   validate: (rows: MpStatRow[]) => boolean,
   maxDaysBack = 7,
 ) {
-  for (let daysAgo = 1; daysAgo <= maxDaysBack; daysAgo++) {
+  // MP 当日/昨日常返回占位行，从 T-2 起试更稳
+  for (let daysAgo = 2; daysAgo <= maxDaysBack; daysAgo++) {
     const body = buildStatBody(statType, keyFieldIds, dataFieldId, daysAgo);
-    const json = await mpPostJson<MpStatResponse>(STAT_API, body);
-    const rows = json.data?.table_data_list?.[0]?.row_list ?? [];
-    if (rows.length > 0 && validate(rows)) {
-      return {
-        date: rows[0]?.time_label ?? "",
-        rows,
-      };
+    try {
+      const json = await mpPostJson<MpStatResponse>(STAT_API, body);
+      const rows = json.data?.table_data_list?.[0]?.row_list ?? [];
+      if (rows.length > 0 && validate(rows)) {
+        return {
+          date: rows[0]?.time_label ?? "",
+          rows,
+        };
+      }
+    } catch (error) {
+      if (isMpTimeRangeError(error)) {
+        continue;
+      }
+      throw error;
     }
   }
   return { date: "", rows: [] as MpStatRow[] };

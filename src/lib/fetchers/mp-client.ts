@@ -77,9 +77,24 @@ export async function mpPostJson<T>(url: string, body: unknown): Promise<T> {
   return json;
 }
 
-export function startOfDayTimestamp(daysAgo = 0) {
-  const date = new Date();
-  date.setDate(date.getDate() - daysAgo);
-  date.setHours(0, 0, 0, 0);
-  return Math.floor(date.getTime() / 1000);
+const CHINA_TIMEZONE = "Asia/Shanghai";
+
+const chinaYmdFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: CHINA_TIMEZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+/** MP 统计接口要求的北京时间 00:00:00 时间戳（秒） */
+export function startOfDayTimestamp(daysAgo = 0): number {
+  const todayYmd = chinaYmdFormatter.format(new Date());
+  const [year, month, day] = todayYmd.split("-").map(Number);
+  const anchor = new Date(
+    `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}T12:00:00+08:00`,
+  );
+  anchor.setDate(anchor.getDate() - daysAgo);
+  const ymd = chinaYmdFormatter.format(anchor);
+
+  return Math.floor(new Date(`${ymd}T00:00:00+08:00`).getTime() / 1000);
 }

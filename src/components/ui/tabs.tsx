@@ -7,7 +7,7 @@ interface TabsProps {
 
 export function tabTriggerClassName(active = false) {
   return cn(
-    "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium transition-colors sm:px-4 sm:py-2 sm:text-sm",
+    "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors sm:px-4 sm:py-2",
     active
       ? "bg-brand-soft font-semibold text-brand ring-1 ring-inset ring-brand-muted"
       : cn("text-slate-600 hover:bg-white/80", linkHoverClass),

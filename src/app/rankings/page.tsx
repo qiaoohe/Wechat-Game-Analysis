@@ -3,6 +3,10 @@ import { Suspense } from "react";
 import { RankTable } from "@/components/rankings/rank-table";
 import { RankTypeTabs } from "@/components/rankings/rank-type-tabs";
 import { EmptyState } from "@/components/shared/empty-state";
+import {
+  DateSelectorLoadingFallback,
+  TabsLoadingFallback,
+} from "@/components/shared/page-loading";
 import { PageHeader } from "@/components/shared/page-header";
 import { PageMetaLine } from "@/components/shared/page-meta-line";
 import { DateSelector } from "@/components/shared/date-selector";
@@ -42,12 +46,12 @@ export default async function RankingsPage({ searchParams }: RankingsPageProps) 
       />
 
       <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <Suspense fallback={null}>
+        <Suspense fallback={<TabsLoadingFallback />}>
           <RankTypeTabs activeType={rankType} mode="query" />
         </Suspense>
 
         {dates.length > 0 ? (
-          <Suspense fallback={null}>
+          <Suspense fallback={<DateSelectorLoadingFallback />}>
             <DateSelector dates={dates} currentDate={date} />
           </Suspense>
         ) : null}

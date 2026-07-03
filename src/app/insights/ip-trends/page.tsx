@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { IpTrendSortTabs } from "@/components/insights/ip-trend-sort-tabs";
 import { IpTrendTable } from "@/components/insights/ip-trend-table";
 import { EmptyState } from "@/components/shared/empty-state";
+import { TabsLoadingFallback } from "@/components/shared/page-loading";
 import { PageHeader } from "@/components/shared/page-header";
 import { PageMetaLine } from "@/components/shared/page-meta-line";
 import { PAGE_DESCRIPTIONS } from "@/lib/constants";
@@ -54,7 +55,7 @@ export default async function IpTrendsPage({ searchParams }: IpTrendsPageProps) 
         />
 
         <div className="mb-6">
-          <Suspense fallback={null}>
+          <Suspense fallback={<TabsLoadingFallback />}>
             <IpTrendSortTabs activeSort={String(sort)} />
           </Suspense>
         </div>
