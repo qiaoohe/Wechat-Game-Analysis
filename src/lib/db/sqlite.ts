@@ -43,6 +43,7 @@ export function initSqliteDatabase() {
       rank_type TEXT NOT NULL,
       game_id INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
       rank INTEGER NOT NULL,
+      rank_labels TEXT,
       created_at TEXT NOT NULL,
       UNIQUE(snapshot_date, rank_type, game_id)
     );
@@ -58,6 +59,12 @@ export function initSqliteDatabase() {
       created_at TEXT NOT NULL
     );
   `);
+
+  try {
+    rawSqlite!.exec(`ALTER TABLE rank_snapshots ADD COLUMN rank_labels TEXT`);
+  } catch {
+    // column already exists
+  }
 }
 
 export { schema as sqliteSchema };

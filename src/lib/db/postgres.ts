@@ -45,6 +45,7 @@ export async function initPostgresDatabase() {
       rank_type TEXT NOT NULL,
       game_id INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
       rank INTEGER NOT NULL,
+      rank_labels TEXT,
       created_at TEXT NOT NULL,
       UNIQUE(snapshot_date, rank_type, game_id)
     )
@@ -68,6 +69,11 @@ export async function initPostgresDatabase() {
       item_count INTEGER,
       created_at TEXT NOT NULL
     )
+  `;
+
+  await sql`
+    ALTER TABLE rank_snapshots
+    ADD COLUMN IF NOT EXISTS rank_labels TEXT
   `;
 }
 

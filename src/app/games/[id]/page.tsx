@@ -1,15 +1,19 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
+import { RankTypeTabs } from "@/components/rankings/rank-type-tabs";
 import { GameAvatar } from "@/components/shared/game-avatar";
+import { EllipsisText } from "@/components/shared/ellipsis-text";
+import { RankLabelBadges } from "@/components/rankings/rank-label-badges";
 import { TrendChart } from "@/components/rankings/trend-chart";
-import { PageHeader } from "@/components/shared/page-header";
-import { Badge } from "@/components/ui/badge";
 import {
-  RANK_TYPES,
   RANK_TYPE_LABELS,
+  RANK_TYPES,
   type RankType,
 } from "@/lib/constants";
+import { cn, mutedLinkClass } from "@/lib/utils";
+import { uiText } from "@/lib/ui-text";
 import {
   getGameById,
   getGameTrend,
@@ -48,44 +52,62 @@ export default async function GamePage({
     (item) => item.gameId === gameId,
   );
 
+  const metaDescription = game.category?.trim() || "暂无简介";
+
   return (
     <div>
-      <PageHeader
-        title={game.name}
-        description={`${game.publisher ?? "未知发行商"} · ${game.category ?? "未分类"}`}
-        action={
-          <Link
-            href="/rankings/bestseller"
-            className="text-sm text-zinc-500 hover:text-zinc-900"
-          >
-            返回榜单
-          </Link>
-        }
-      />
+      <Link
+        href={`/rankings?type=${rankType}`}
+        className={cn("mb-4 inline-flex text-sm", mutedLinkClass)}
+      >
+        ← 返回榜单
+      </Link>
 
-      <div className="mb-6 flex items-start gap-4">
-        <GameAvatar name={game.name} iconUrl={game.iconUrl} size="lg" />
-        <div className="flex flex-wrap gap-2">
-        {RANK_TYPES.map((item) => (
-          <Link key={item} href={`/games/${gameId}?type=${item}`}>
-            <Badge variant={rankType === item ? "default" : "outline"} className={rankType === item ? "bg-brand font-semibold text-brand-foreground hover:bg-brand" : ""}>
-              {RANK_TYPE_LABELS[item]}
-            </Badge>
-          </Link>
-        ))}
+      <div className="mb-6 rounded-xl border border-slate-200/80 bg-white p-4 sm:mb-8 sm:p-5">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:gap-6">
+          <div className="flex min-w-0 flex-1 items-start gap-3 sm:gap-5">
+            <GameAvatar
+              name={game.name}
+              iconUrl={game.iconUrl}
+              size="lg"
+              className="!h-12 !w-12 shrink-0 sm:!h-14 sm:!w-14"
+            />
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl font-semibold tracking-tight text-zinc-900 sm:text-2xl">
+                {game.name}
+              </h1>
+              <EllipsisText
+                lines={2}
+                className="mt-1.5 text-sm leading-6 text-zinc-500"
+              >
+                {metaDescription}
+              </EllipsisText>
+              {latestRankings?.rankLabels?.length ? (
+                <div className="mt-3">
+                  <RankLabelBadges labels={latestRankings.rankLabels} />
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="w-full shrink-0 md:ml-auto md:w-auto md:pt-1">
+            <Suspense fallback={null}>
+              <RankTypeTabs activeType={rankType} mode="query" />
+            </Suspense>
+          </div>
         </div>
       </div>
 
-      <div className="mb-6 grid gap-4 md:grid-cols-3">
-        <div className="rounded-xl border border-zinc-200 bg-white p-6">
-          <p className="text-sm text-zinc-500">当前排名</p>
-          <p className="mt-2 text-3xl font-semibold text-zinc-900">
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+        <div className="rounded-xl border border-slate-200/80 bg-white p-4 sm:p-5">
+          <p className={cn("text-xs text-zinc-500 sm:text-sm", uiText.label)}>当前排名</p>
+          <p className="mt-1.5 text-2xl font-semibold whitespace-nowrap text-zinc-900 sm:mt-2 sm:text-3xl">
             {latestRankings ? `#${latestRankings.rank}` : "—"}
           </p>
         </div>
-        <div className="rounded-xl border border-zinc-200 bg-white p-6">
-          <p className="text-sm text-zinc-500">日变化</p>
-          <p className="mt-2 text-3xl font-semibold text-zinc-900">
+        <div className="rounded-xl border border-slate-200/80 bg-white p-4 sm:p-5">
+          <p className={cn("text-xs text-zinc-500 sm:text-sm", uiText.label)}>日变化</p>
+          <p className="mt-1.5 text-2xl font-semibold whitespace-nowrap text-zinc-900 sm:mt-2 sm:text-3xl">
             {latestRankings?.rankChange != null
               ? latestRankings.rankChange > 0
                 ? `+${latestRankings.rankChange}`
@@ -93,9 +115,12 @@ export default async function GamePage({
               : "—"}
           </p>
         </div>
-        <div className="rounded-xl border border-zinc-200 bg-white p-6">
-          <p className="text-sm text-zinc-500">AppID</p>
-          <p className="mt-2 text-sm font-medium text-zinc-900">
+        <div className="col-span-2 rounded-xl border border-slate-200/80 bg-white p-4 sm:col-span-1 sm:p-5">
+          <p className={cn("text-xs text-zinc-500 sm:text-sm", uiText.label)}>AppID</p>
+          <p
+            className={cn("mt-2 text-sm font-medium text-zinc-900", uiText.line1)}
+            title={game.appId ?? undefined}
+          >
             {game.appId ?? "未录入"}
           </p>
         </div>

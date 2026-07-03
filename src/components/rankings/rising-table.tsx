@@ -1,9 +1,20 @@
 import Link from "next/link";
 
+import { EllipsisText } from "@/components/shared/ellipsis-text";
 import { GameAvatar } from "@/components/shared/game-avatar";
 import { RankChangeBadge } from "@/components/rankings/rank-change-badge";
+import {
+  RankTableBody,
+  RankTableCell,
+  RankTableHead,
+  RankTableHeaderCell,
+  RankTableRow,
+  RankTableShell,
+} from "@/components/rankings/rank-table-shell";
 import { Card, CardContent } from "@/components/ui/card";
 import type { RisingGame } from "@/lib/types";
+import { uiText } from "@/lib/ui-text";
+import { cn, textLinkClass } from "@/lib/utils";
 
 interface RisingTableProps {
   items: RisingGame[];
@@ -11,66 +22,73 @@ interface RisingTableProps {
 
 export function RisingTable({ items }: RisingTableProps) {
   return (
-    <Card>
+    <Card className="overflow-hidden border-slate-200/80">
       <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-400">
-                <th className="px-6 py-4 font-medium">游戏</th>
-                <th className="px-6 py-4 font-medium">当前排名</th>
-                <th className="px-6 py-4 font-medium">日变化</th>
-                <th className="px-6 py-4 font-medium">7日变化</th>
-                <th className="px-6 py-4 font-medium">连续上升</th>
-                <th className="px-6 py-4 font-medium">增速分</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item) => (
-                <tr
-                  key={item.gameId}
-                  className="border-b border-slate-50 last:border-0 hover:bg-brand-soft/60"
-                >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <GameAvatar
-                        name={item.name}
-                        iconUrl={item.iconUrl}
-                        size="sm"
-                      />
-                      <div>
-                        <Link
-                          href={`/games/${item.gameId}`}
-                          className="font-medium text-slate-900 hover:text-brand-text"
+        <RankTableShell>
+          <colgroup>
+            <col />
+            <col style={{ width: "96px" }} />
+            <col style={{ width: "96px" }} />
+            <col style={{ width: "96px" }} />
+            <col style={{ width: "96px" }} />
+            <col style={{ width: "80px" }} />
+          </colgroup>
+          <RankTableHead>
+            <RankTableHeaderCell>游戏</RankTableHeaderCell>
+            <RankTableHeaderCell className="text-center">当前排名</RankTableHeaderCell>
+            <RankTableHeaderCell className="text-center">日变化</RankTableHeaderCell>
+            <RankTableHeaderCell className="text-center">7日变化</RankTableHeaderCell>
+            <RankTableHeaderCell className="text-center">连续上升</RankTableHeaderCell>
+            <RankTableHeaderCell className="text-center">增速分</RankTableHeaderCell>
+          </RankTableHead>
+          <RankTableBody>
+            {items.map((item) => (
+              <RankTableRow key={item.gameId}>
+                <RankTableCell>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <GameAvatar
+                      name={item.name}
+                      iconUrl={item.iconUrl}
+                      size="rank"
+                      className="!h-10 !w-10 sm:!h-12 sm:!w-12"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <Link
+                        href={`/games/${item.gameId}`}
+                        className={textLinkClass}
+                      >
+                        <EllipsisText>{item.name}</EllipsisText>
+                      </Link>
+                      {item.category ? (
+                        <EllipsisText
+                          lines={1}
+                          className="mt-1 text-xs text-slate-400"
                         >
-                          {item.name}
-                        </Link>
-                        <p className="mt-1 text-xs text-slate-400">
-                          {item.publisher ?? "未知发行商"}
-                        </p>
-                      </div>
+                          {item.category}
+                        </EllipsisText>
+                      ) : null}
                     </div>
-                  </td>
-                  <td className="px-6 py-4 font-semibold text-slate-900">
-                    #{item.currentRank}
-                  </td>
-                  <td className="px-6 py-4">
-                    <RankChangeBadge change={item.dailyChange} />
-                  </td>
-                  <td className="px-6 py-4">
-                    <RankChangeBadge change={item.weeklyChange} />
-                  </td>
-                  <td className="px-6 py-4 text-slate-600">
-                    {item.consecutiveDaysUp} 天
-                  </td>
-                  <td className="px-6 py-4 font-semibold text-brand-text">
-                    {item.risingScore.toFixed(1)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+                </RankTableCell>
+                <RankTableCell className={cn("text-center font-semibold text-slate-900", uiText.num)}>
+                  #{item.currentRank}
+                </RankTableCell>
+                <RankTableCell className={cn("text-center", uiText.num)}>
+                  <RankChangeBadge change={item.dailyChange} compact />
+                </RankTableCell>
+                <RankTableCell className={cn("text-center", uiText.num)}>
+                  <RankChangeBadge change={item.weeklyChange} compact />
+                </RankTableCell>
+                <RankTableCell className={cn("text-center text-slate-600", uiText.num)}>
+                  {item.consecutiveDaysUp} 天
+                </RankTableCell>
+                <RankTableCell className={cn("text-center font-semibold text-brand-text", uiText.num)}>
+                  {item.risingScore.toFixed(1)}
+                </RankTableCell>
+              </RankTableRow>
+            ))}
+          </RankTableBody>
+        </RankTableShell>
       </CardContent>
     </Card>
   );

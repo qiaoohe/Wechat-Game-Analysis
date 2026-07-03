@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { uiText } from "@/lib/ui-text";
 import { cn } from "@/lib/utils";
 
 interface StatCardProps {
@@ -10,13 +11,17 @@ interface StatCardProps {
 
 export function StatCard({ label, value, hint, className }: StatCardProps) {
   return (
-    <Card className={cn("border-zinc-200/80", className)}>
-      <CardContent className="p-6">
-        <p className="text-sm text-zinc-500">{label}</p>
-        <p className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900">
+    <Card className={cn("border-slate-200/80", className)}>
+      <CardContent className="p-4 sm:p-6">
+        <p className={cn("text-xs text-slate-500 sm:text-sm", uiText.label)}>{label}</p>
+        <p className="mt-2 truncate text-2xl font-semibold tracking-tight text-slate-900 sm:mt-3 sm:text-3xl">
           {value}
         </p>
-        {hint ? <p className="mt-2 text-xs text-zinc-400">{hint}</p> : null}
+        {hint ? (
+          <p className={cn("mt-2 text-xs text-slate-400", uiText.line1)} title={hint}>
+            {hint}
+          </p>
+        ) : null}
       </CardContent>
     </Card>
   );

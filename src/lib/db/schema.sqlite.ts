@@ -20,6 +20,7 @@ export const rankSnapshots = sqliteTable(
       .notNull()
       .references(() => games.id, { onDelete: "cascade" }),
     rank: integer("rank").notNull(),
+    rankLabels: text("rank_labels"),
     createdAt: text("created_at").notNull(),
   },
   (table) => [unique().on(table.snapshotDate, table.rankType, table.gameId)],

@@ -36,7 +36,7 @@ export function TrendChart({ data, title = "排名趋势" }: TrendChartProps) {
             暂无历史数据
           </div>
         ) : (
-          <div className="h-64 w-full">
+          <div className="h-52 w-full sm:h-64">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />

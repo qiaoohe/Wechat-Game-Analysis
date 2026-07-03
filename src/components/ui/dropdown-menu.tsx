@@ -4,7 +4,7 @@ import { ChevronDown } from "lucide-react";
 import * as React from "react";
 
 import { Button, type ButtonProps } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn, linkHoverClass } from "@/lib/utils";
 
 interface DropdownMenuContextValue {
   open: boolean;
@@ -173,7 +173,7 @@ export function DropdownMenuItem({
         "flex w-full items-center rounded-lg px-3 py-2 text-left text-sm transition-colors",
         selected
           ? "bg-brand-soft font-medium text-brand-text"
-          : "text-slate-700 hover:bg-brand-soft/70 hover:text-brand-text",
+          : cn("text-slate-700 hover:bg-brand-soft/70", linkHoverClass),
         className,
       )}
       onClick={() => {

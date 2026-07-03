@@ -1,10 +1,12 @@
 import { Suspense } from "react";
 
-import { RankTypeTabs } from "@/components/rankings/rank-type-tabs";
 import { RisingTable } from "@/components/rankings/rising-table";
+import { RankTypeTabs } from "@/components/rankings/rank-type-tabs";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
+import { PageMetaLine } from "@/components/shared/page-meta-line";
 import {
+  PAGE_DESCRIPTIONS,
   RANK_TYPE_LABELS,
   RANK_TYPES,
   type RankType,
@@ -28,10 +30,10 @@ export default async function RisingPage({ searchParams }: RisingPageProps) {
     <div>
       <PageHeader
         title="增速榜"
-        description="综合日环比、7 日变化和连续上升天数，识别排名快速上升的小游戏。"
+        description={PAGE_DESCRIPTIONS.rising}
       />
 
-      <div className="mb-6">
+      <div className="mb-4">
         <Suspense fallback={null}>
           <RankTypeTabs activeType={rankType} mode="query" />
         </Suspense>
@@ -44,9 +46,13 @@ export default async function RisingPage({ searchParams }: RisingPageProps) {
         />
       ) : (
         <>
-          <p className="mb-4 text-sm text-zinc-500">
-            {RANK_TYPE_LABELS[rankType]} · 数据日期 {date} · 共 {items.length} 款上升趋势游戏
-          </p>
+          <PageMetaLine
+            items={[
+              RANK_TYPE_LABELS[rankType],
+              `数据日期 ${date}`,
+              `共 ${items.length} 款上升趋势游戏`,
+            ]}
+          />
           <RisingTable items={items} />
         </>
       )}

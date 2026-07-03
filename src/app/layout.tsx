@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { AppShell } from "@/components/layout/app-shell";
@@ -15,13 +15,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#e04d4e",
+};
+
 export const metadata: Metadata = {
   title: "微信小游戏榜单监测",
   description: "基于微信官方小游戏榜单数据的内部监测与整理平台",
-  icons: {
-    icon: [{ url: "/icon.png", sizes: "512x512", type: "image/png" }],
-    apple: "/icon.png",
-  },
 };
 
 export const dynamic = "force-dynamic";

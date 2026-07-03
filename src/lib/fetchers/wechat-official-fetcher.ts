@@ -92,10 +92,7 @@ function extractEmbeddedJson<T>(html: string, globalKey: string): T | null {
   return null;
 }
 
-function parsePublicRankItem(
-  raw: PublicRankListItem,
-  index: number,
-): FetchedRankItem | null {
+function parsePublicRankItem(raw: PublicRankListItem): FetchedRankItem | null {
   const base = raw.wxag_game?.app_info?.base;
   const sellPoint = raw.sell_point;
   const pcApp = raw.pc_appitem?.app_info;
@@ -123,7 +120,7 @@ function parsePublicRankItem(
     mainType && subType ? `${mainType}/${subType}` : mainType || subType;
 
   return {
-    rank: index + 1,
+    rank: 0,
     name,
     appId,
     category,
@@ -154,8 +151,9 @@ export async function fetchOfficialRank(
   }
 
   const items = detail.list
-    .map((item, index) => parsePublicRankItem(item, index))
-    .filter((item): item is FetchedRankItem => item !== null);
+    .map((item) => parsePublicRankItem(item))
+    .filter((item): item is FetchedRankItem => item !== null)
+    .map((item, index) => ({ ...item, rank: index + 1 }));
 
   if (items.length < 5) {
     throw new Error(`榜单数据不完整，仅解析到 ${items.length} 条`);

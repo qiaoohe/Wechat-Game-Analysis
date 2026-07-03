@@ -12,6 +12,7 @@ import type {
   RankEntry,
   RisingGame,
 } from "@/lib/types";
+import { parseRankLabelsJson } from "@/lib/rank-labels";
 
 type RankingRow = {
   gameId: number;
@@ -21,7 +22,32 @@ type RankingRow = {
   category: string | null;
   iconUrl: string | null;
   rank: number;
+  rankLabels: string | null;
+  createdAt: string;
 };
+
+function keepLatestSnapshotBatch<T extends { createdAt: string }>(rows: T[]): T[] {
+  if (rows.length === 0) return rows;
+
+  const latestBatchAt = rows.reduce(
+    (max, row) => (row.createdAt > max ? row.createdAt : max),
+    rows[0]!.createdAt,
+  );
+
+  return rows.filter((row) => row.createdAt === latestBatchAt);
+}
+
+function normalizeRankEntries(items: RankEntry[]): RankEntry[] {
+  return items.map((item, index) => {
+    const rank = index + 1;
+    return {
+      ...item,
+      rank,
+      rankChange:
+        item.previousRank !== null ? item.previousRank - rank : item.rankChange,
+    };
+  });
+}
 
 export async function ensureDb() {
   await initDatabase();
@@ -96,6 +122,8 @@ export async function getRankings(
       category: games.category,
       iconUrl: games.iconUrl,
       rank: rankSnapshots.rank,
+      rankLabels: rankSnapshots.rankLabels,
+      createdAt: rankSnapshots.createdAt,
     })
     .from(rankSnapshots)
     .innerJoin(games, eq(rankSnapshots.gameId, games.id))
@@ -105,26 +133,31 @@ export async function getRankings(
         eq(rankSnapshots.rankType, rankType),
       ),
     )
-    .orderBy(asc(rankSnapshots.rank))) as RankingRow[];
+    .orderBy(asc(rankSnapshots.rank), asc(games.id))) as RankingRow[];
 
-  const items: RankEntry[] = currentRows.map((row) => {
-    const previousRank = previousMap.get(row.gameId) ?? null;
-    const rankChange =
-      previousRank !== null ? previousRank - row.rank : null;
+  const latestRows = keepLatestSnapshotBatch(currentRows);
 
-    return {
-      gameId: row.gameId,
-      appId: row.appId,
-      name: row.name,
-      publisher: row.publisher,
-      category: row.category,
-      iconUrl: row.iconUrl,
-      rank: row.rank,
-      previousRank,
-      rankChange,
-      isNew: previousRank === null,
-    };
-  });
+  const items: RankEntry[] = normalizeRankEntries(
+    latestRows.map((row) => {
+      const previousRank = previousMap.get(row.gameId) ?? null;
+      const rankChange =
+        previousRank !== null ? previousRank - row.rank : null;
+
+      return {
+        gameId: row.gameId,
+        appId: row.appId,
+        name: row.name,
+        publisher: row.publisher,
+        category: row.category,
+        iconUrl: row.iconUrl,
+        rank: row.rank,
+        previousRank,
+        rankChange,
+        isNew: previousRank === null,
+        rankLabels: parseRankLabelsJson(row.rankLabels),
+      };
+    }),
+  );
 
   return { date: targetDate, previousDate, items };
 }
@@ -352,6 +385,11 @@ async function upsertRankItemAsync(
 
   if (!game) return;
 
+  const rankLabelsJson =
+    item.rankLabels && item.rankLabels.length > 0
+      ? JSON.stringify(item.rankLabels)
+      : null;
+
   await tx
     .insert(rankSnapshots)
     .values({
@@ -359,6 +397,7 @@ async function upsertRankItemAsync(
       rankType: payload.rankType,
       gameId: game.id,
       rank: item.rank,
+      rankLabels: rankLabelsJson,
       createdAt: now,
     })
     .onConflictDoUpdate({
@@ -367,7 +406,7 @@ async function upsertRankItemAsync(
         rankSnapshots.rankType,
         rankSnapshots.gameId,
       ],
-      set: { rank: item.rank, createdAt: now },
+      set: { rank: item.rank, rankLabels: rankLabelsJson, createdAt: now },
     });
 }
 
@@ -410,12 +449,18 @@ function upsertRankItemSync(
 
   if (!game) return;
 
+  const rankLabelsJson =
+    item.rankLabels && item.rankLabels.length > 0
+      ? JSON.stringify(item.rankLabels)
+      : null;
+
   tx.insert(rankSnapshots)
     .values({
       snapshotDate: payload.date,
       rankType: payload.rankType,
       gameId: game.id,
       rank: item.rank,
+      rankLabels: rankLabelsJson,
       createdAt: now,
     })
     .onConflictDoUpdate({
@@ -424,7 +469,7 @@ function upsertRankItemSync(
         rankSnapshots.rankType,
         rankSnapshots.gameId,
       ],
-      set: { rank: item.rank, createdAt: now },
+      set: { rank: item.rank, rankLabels: rankLabelsJson, createdAt: now },
     })
     .run();
 }
@@ -432,20 +477,31 @@ function upsertRankItemSync(
 export async function importRankSnapshot(payload: ImportPayload) {
   await ensureDb();
   const now = new Date().toISOString();
+  const items = payload.items.map((item, index) => ({
+    ...item,
+    rank: index + 1,
+  }));
+
+  const snapshotFilter = and(
+    eq(rankSnapshots.snapshotDate, payload.date),
+    eq(rankSnapshots.rankType, payload.rankType),
+  );
 
   if (usePostgres()) {
-    for (const item of payload.items) {
+    await db.delete(rankSnapshots).where(snapshotFilter);
+    for (const item of items) {
       await upsertRankItemAsync(db, payload, item, now);
     }
   } else {
     getSqliteDb().transaction((tx) => {
-      for (const item of payload.items) {
+      tx.delete(rankSnapshots).where(snapshotFilter).run();
+      for (const item of items) {
         upsertRankItemSync(tx, payload, item, now);
       }
     });
   }
 
-  return { success: true, count: payload.items.length };
+  return { success: true, count: items.length };
 }
 
 export async function searchGames(query: string, limit = 10) {

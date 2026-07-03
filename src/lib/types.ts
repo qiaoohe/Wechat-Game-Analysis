@@ -11,6 +11,7 @@ export interface RankEntry {
   previousRank: number | null;
   rankChange: number | null;
   isNew: boolean;
+  rankLabels: string[];
 }
 
 export interface RisingGame {
@@ -48,6 +49,7 @@ export interface ImportRankItem {
   publisher?: string;
   category?: string;
   iconUrl?: string;
+  rankLabels?: string[];
 }
 
 export interface ImportPayload {
@@ -78,4 +80,33 @@ export interface FetchLogEntry {
   message: string | null;
   itemCount: number | null;
   createdAt: string;
+}
+
+export interface HotWordItem {
+  rank: number;
+  name: string;
+  isNew: boolean;
+  isUp: boolean;
+}
+
+export interface HotSearchVisitItem {
+  rank: number;
+  appId: string;
+  name: string;
+  bannerUrl?: string;
+  iconUrl?: string;
+  description?: string;
+}
+
+export interface IpTrendItem {
+  rank: number;
+  id: number;
+  name: string;
+  description?: string;
+  iconUrl?: string | null;
+  wxIndex: number;
+  wxIndexLabel: string;
+  wxIndexChange: number;
+  tags: string[];
+  updatedAt?: string;
 }

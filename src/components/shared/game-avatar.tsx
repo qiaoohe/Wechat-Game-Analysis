@@ -8,13 +8,15 @@ import { resolveGameIconUrl } from "@/lib/utils/icon";
 interface GameAvatarProps {
   name: string;
   iconUrl?: string | null;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "rank" | "lg";
   className?: string;
 }
 
 const sizeMap = {
   sm: { box: "h-8 w-8", px: 32 },
   md: { box: "h-10 w-10", px: 40 },
+  /** 榜单行：与游戏名 + 标签行等高 */
+  rank: { box: "h-12 w-12", px: 48 },
   lg: { box: "h-14 w-14", px: 56 },
 };
 
@@ -30,7 +32,7 @@ export function GameAvatar({
   return (
     <div
       className={cn(
-        "relative shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50",
+        "relative shrink-0 overflow-hidden rounded-full border border-slate-200 bg-slate-50",
         box,
         className,
       )}

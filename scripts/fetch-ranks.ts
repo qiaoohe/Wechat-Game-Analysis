@@ -1,8 +1,8 @@
-import { fetchAllOfficialRanks } from "../src/lib/fetchers/wechat-official-fetcher";
+import { fetchAllRanks } from "../src/lib/fetchers/rank-fetcher";
 
 async function main() {
   const date = process.argv[2];
-  const result = await fetchAllOfficialRanks(date);
+  const result = await fetchAllRanks(date);
   console.log(JSON.stringify(result, null, 2));
   process.exit(result.success ? 0 : 1);
 }

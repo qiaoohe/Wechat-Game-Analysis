@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
 import {
-  fetchAllOfficialRanks,
+  fetchAllRanks,
   getFetchConfigStatus,
-} from "@/lib/fetchers/wechat-official-fetcher";
+} from "@/lib/fetchers/rank-fetcher";
 
 function isAuthorized(request: Request) {
   const secret = process.env.CRON_SECRET;
@@ -13,7 +13,7 @@ function isAuthorized(request: Request) {
 }
 
 async function runFetch(date?: string) {
-  const result = await fetchAllOfficialRanks(date);
+  const result = await fetchAllRanks(date);
   return NextResponse.json(result, { status: result.success ? 200 : 502 });
 }
 

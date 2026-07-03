@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 
 import { Tabs, tabTriggerClassName } from "@/components/ui/tabs";
 import { RANK_TYPES, RANK_TYPE_LABELS, type RankType } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
 interface RankTypeTabsProps {
   activeType: RankType;
@@ -40,7 +41,10 @@ export function RankTypeTabs({
           <Link
             key={type}
             href={href}
-            className={tabTriggerClassName(activeType === type)}
+            className={cn(
+              tabTriggerClassName(activeType === type),
+              "flex-1 md:flex-none",
+            )}
           >
             {RANK_TYPE_LABELS[type]}
           </Link>
