@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { IpTrendPagination } from "@/components/insights/ip-trend-pagination";
 import { IpTrendSortTabs } from "@/components/insights/ip-trend-sort-tabs";
 import { IpTrendTable } from "@/components/insights/ip-trend-table";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -18,16 +19,22 @@ import { createPageMetadata, SEO_PAGE_COPY } from "@/lib/site-seo";
 export const metadata = createPageMetadata(SEO_PAGE_COPY.ipTrends);
 
 interface IpTrendsPageProps {
-  searchParams: Promise<{ sort?: string }>;
+  searchParams: Promise<{ sort?: string; page?: string }>;
 }
 
 function parseSort(value?: string): IpTrendSortType {
   return value === "3" ? 3 : 4;
 }
 
+function parsePage(value?: string) {
+  const page = Number.parseInt(value ?? "1", 10);
+  return Number.isFinite(page) && page > 0 ? page : 1;
+}
+
 export default async function IpTrendsPage({ searchParams }: IpTrendsPageProps) {
-  const { sort: sortParam } = await searchParams;
+  const { sort: sortParam, page: pageParam } = await searchParams;
   const sort = parseSort(sortParam);
+  const page = parsePage(pageParam);
 
   if (!getMpCookie()) {
     return (
@@ -45,7 +52,17 @@ export default async function IpTrendsPage({ searchParams }: IpTrendsPageProps) 
   }
 
   try {
-    const { items, totalCount } = await fetchIpTrends(sort);
+    const {
+      items,
+      totalCount,
+      page: currentPage,
+      pageSize,
+      totalPages,
+    } = await fetchIpTrends(sort, page);
+
+    const rangeStart =
+      items.length > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+    const rangeEnd = items.length > 0 ? rangeStart + items.length - 1 : 0;
 
     return (
       <div>
@@ -70,10 +87,17 @@ export default async function IpTrendsPage({ searchParams }: IpTrendsPageProps) 
             <PageMetaLine
               items={[
                 IP_TREND_SORT_LABELS[sort],
-                `展示 Top ${items.length}${totalCount > items.length ? ` / 共 ${totalCount} 个 IP` : ""}`,
+                items.length > 0
+                  ? `第 ${rangeStart}–${rangeEnd} 名 · 共 ${totalCount} 个 IP`
+                  : `共 ${totalCount} 个 IP`,
               ]}
             />
             <IpTrendTable items={items} />
+            <IpTrendPagination
+              page={currentPage}
+              totalPages={totalPages}
+              sort={String(sort)}
+            />
           </>
         )}
       </div>

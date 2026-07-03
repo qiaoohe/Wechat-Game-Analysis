@@ -1,8 +1,6 @@
-import {
-  mpGetJson,
-  mpPostJson,
-  startOfDayTimestamp,
-} from "@/lib/fetchers/mp-client";
+import { unstable_cache } from "next/cache";
+
+import { mpPostJson, startOfDayTimestamp } from "@/lib/fetchers/mp-client";
 import type {
   HotSearchVisitItem,
   HotWordItem,
@@ -15,6 +13,12 @@ const STAT_API =
 
 const IP_LIST_API =
   "https://gamemp.weixin.qq.com/cgi-bin/gamewxagcirclemanageweb/cfcommcgi/spacexgamemp_ipcooperate_getipcooperatelist";
+
+const IP_LIBRARY_REFERER =
+  "https://gamemp.weixin.qq.com/minigame/minigame/minigame_ip/ip_cooperation_library";
+
+const IP_LIST_PAGE_SIZE = 20;
+const IP_TRENDS_DISPLAY_PAGE_SIZE = 50;
 
 interface MpStatRow {
   time_label?: string;
@@ -199,33 +203,112 @@ function formatWxIndex(value: number) {
   return value.toLocaleString("zh-CN");
 }
 
+function mapIpItem(item: MpIpItem, rank: number): IpTrendItem {
+  return {
+    rank,
+    id: item.id ?? rank,
+    name: item.ip_name?.trim() ?? "未知 IP",
+    description: item.ip_desc?.trim() || undefined,
+    iconUrl: normalizeIconUrl(item.ip_icon),
+    wxIndex: item.wxindex ?? 0,
+    wxIndexLabel: formatWxIndex(item.wxindex ?? 0),
+    wxIndexChange: item.wxindex_change ?? 0,
+    tags: item.style_list
+      ? item.style_list.split(",").map((tag) => tag.trim()).filter(Boolean)
+      : [],
+    updatedAt: item.wxindex_time?.trim() || undefined,
+  };
+}
+
+function sortIpItems(items: MpIpItem[], orderType: IpTrendSortType) {
+  const sorted = [...items];
+  if (orderType === 4) {
+    sorted.sort(
+      (a, b) => (b.wxindex_change ?? 0) - (a.wxindex_change ?? 0),
+    );
+    return sorted;
+  }
+  sorted.sort((a, b) => (b.wxindex ?? 0) - (a.wxindex ?? 0));
+  return sorted;
+}
+
+async function fetchAllIpRawItemsUncached(): Promise<{
+  list: MpIpItem[];
+  totalCount: number;
+}> {
+  const first = await mpPostJson<MpIpListResponse>(
+    IP_LIST_API,
+    { order_type: 1, cur_page: 0, per_page: IP_LIST_PAGE_SIZE },
+    { referer: IP_LIBRARY_REFERER },
+  );
+  const totalCount = first.data?.total_count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / IP_LIST_PAGE_SIZE));
+
+  const pageResults = await Promise.all(
+    Array.from({ length: totalPages }, (_, curPage) =>
+      curPage === 0
+        ? Promise.resolve(first)
+        : mpPostJson<MpIpListResponse>(
+            IP_LIST_API,
+            {
+              order_type: 1,
+              cur_page: curPage,
+              per_page: IP_LIST_PAGE_SIZE,
+            },
+            { referer: IP_LIBRARY_REFERER },
+          ),
+    ),
+  );
+
+  const seen = new Set<number>();
+  const list: MpIpItem[] = [];
+  for (const json of pageResults) {
+    for (const item of json.data?.list ?? []) {
+      if (!item.wxindex || item.wxindex <= 0 || item.id == null) {
+        continue;
+      }
+      if (seen.has(item.id)) {
+        continue;
+      }
+      seen.add(item.id);
+      list.push(item);
+    }
+  }
+
+  return { list, totalCount };
+}
+
+const fetchAllIpRawItems = unstable_cache(
+  fetchAllIpRawItemsUncached,
+  ["mp-ip-cooperation-all"],
+  { revalidate: 3600 },
+);
+
 export async function fetchIpTrends(
   orderType: IpTrendSortType = 4,
-  perPage = 50,
-): Promise<{ items: IpTrendItem[]; totalCount: number }> {
-  const url = `${IP_LIST_API}?order_type=${orderType}&cur_page=0&per_page=${perPage}`;
-  const json = await mpGetJson<MpIpListResponse>(url);
-  const list = json.data?.list ?? [];
-
-  const items = list
-    .filter((item) => item.wxindex && item.wxindex > 0)
-    .map((item, index) => ({
-      rank: index + 1,
-      id: item.id ?? index,
-      name: item.ip_name?.trim() ?? "未知 IP",
-      description: item.ip_desc?.trim() || undefined,
-      iconUrl: normalizeIconUrl(item.ip_icon),
-      wxIndex: item.wxindex ?? 0,
-      wxIndexLabel: formatWxIndex(item.wxindex ?? 0),
-      wxIndexChange: item.wxindex_change ?? 0,
-      tags: item.style_list
-        ? item.style_list.split(",").map((tag) => tag.trim()).filter(Boolean)
-        : [],
-      updatedAt: item.wxindex_time?.trim() || undefined,
-    }));
+  page = 1,
+  pageSize = IP_TRENDS_DISPLAY_PAGE_SIZE,
+): Promise<{
+  items: IpTrendItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}> {
+  const { list, totalCount } = await fetchAllIpRawItems();
+  const sorted = sortIpItems(list, orderType);
+  const safePage = Math.min(
+    Math.max(1, page),
+    Math.max(1, Math.ceil(sorted.length / pageSize)),
+  );
+  const start = (safePage - 1) * pageSize;
+  const slice = sorted.slice(start, start + pageSize);
 
   return {
-    items,
-    totalCount: json.data?.total_count ?? items.length,
+    items: slice.map((item, index) => mapIpItem(item, start + index + 1)),
+    totalCount: sorted.length || totalCount,
+    page: safePage,
+    pageSize,
+    totalPages: Math.max(1, Math.ceil(sorted.length / pageSize)),
   };
 }

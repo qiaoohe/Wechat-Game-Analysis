@@ -48,11 +48,16 @@ export async function mpGetJson<T>(url: string): Promise<T> {
   return json;
 }
 
-export async function mpPostJson<T>(url: string, body: unknown): Promise<T> {
+export async function mpPostJson<T>(
+  url: string,
+  body: unknown,
+  options?: { referer?: string },
+): Promise<T> {
   const response = await fetch(url, {
     method: "POST",
     headers: {
       ...getMpHeaders(),
+      ...(options?.referer ? { Referer: options.referer } : {}),
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
