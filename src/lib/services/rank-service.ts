@@ -434,11 +434,9 @@ export async function importRankSnapshot(payload: ImportPayload) {
   const now = new Date().toISOString();
 
   if (usePostgres()) {
-    await db.transaction(async (tx: typeof db) => {
-      for (const item of payload.items) {
-        await upsertRankItemAsync(tx, payload, item, now);
-      }
-    });
+    for (const item of payload.items) {
+      await upsertRankItemAsync(db, payload, item, now);
+    }
   } else {
     getSqliteDb().transaction((tx) => {
       for (const item of payload.items) {

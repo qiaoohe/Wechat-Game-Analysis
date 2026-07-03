@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:seed": "tsx scripts/seed.ts",
-    "fetch": "tsx scripts/fetch-ranks.ts"
+    "db:seed": "tsx --env-file=.env.local scripts/seed.ts",
+    "fetch": "tsx --env-file=.env.local scripts/fetch-ranks.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",

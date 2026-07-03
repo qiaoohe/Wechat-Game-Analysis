@@ -105,41 +105,39 @@ function seedSqlite(now: string, rankTypes: RankType[]) {
 }
 
 async function seedPostgres(now: string, rankTypes: RankType[]) {
-  await db.transaction(async (tx: typeof db) => {
-    const gameIds: number[] = [];
-    for (const game of SAMPLE_GAMES) {
-      const [inserted] = await tx
-        .insert(games)
-        .values({
-          appId: game.appId,
-          name: game.name,
-          publisher: game.publisher,
-          category: game.category,
-          iconUrl: getGameIconFallback(game.name),
+  const gameIds: number[] = [];
+  for (const game of SAMPLE_GAMES) {
+    const [inserted] = await db
+      .insert(games)
+      .values({
+        appId: game.appId,
+        name: game.name,
+        publisher: game.publisher,
+        category: game.category,
+        iconUrl: getGameIconFallback(game.name),
+        createdAt: now,
+      })
+      .returning();
+    gameIds.push(inserted!.id);
+  }
+
+  for (let dayOffset = 13; dayOffset >= 0; dayOffset -= 1) {
+    const date = format(subDays(new Date(), dayOffset), "yyyy-MM-dd");
+
+    for (const rankType of rankTypes) {
+      const order = generateRankOrder(13 - dayOffset, rankType);
+      for (let rankIndex = 0; rankIndex < order.length; rankIndex += 1) {
+        const gameIndex = order[rankIndex]!;
+        await db.insert(rankSnapshots).values({
+          snapshotDate: date,
+          rankType,
+          gameId: gameIds[gameIndex]!,
+          rank: rankIndex + 1,
           createdAt: now,
-        })
-        .returning();
-      gameIds.push(inserted!.id);
-    }
-
-    for (let dayOffset = 13; dayOffset >= 0; dayOffset -= 1) {
-      const date = format(subDays(new Date(), dayOffset), "yyyy-MM-dd");
-
-      for (const rankType of rankTypes) {
-        const order = generateRankOrder(13 - dayOffset, rankType);
-        for (let rankIndex = 0; rankIndex < order.length; rankIndex += 1) {
-          const gameIndex = order[rankIndex]!;
-          await tx.insert(rankSnapshots).values({
-            snapshotDate: date,
-            rankType,
-            gameId: gameIds[gameIndex]!,
-            rank: rankIndex + 1,
-            createdAt: now,
-          });
-        }
+        });
       }
     }
-  });
+  }
 }
 
 export async function seedDatabase() {
