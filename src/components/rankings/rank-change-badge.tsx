@@ -1,6 +1,7 @@
-import { ArrowDown, ArrowUp, Minus, Sparkles } from "lucide-react";
+import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { NewRankBadge } from "@/components/rankings/new-rank-badge";
 import { cn } from "@/lib/utils";
 
 interface RankChangeBadgeProps {
@@ -26,12 +27,7 @@ export function RankChangeBadge({
   );
 
   if (isNew) {
-    return wrap(
-      <Badge variant="warning" className={badgeClass}>
-        <Sparkles className={iconClass} />
-        新上榜
-      </Badge>,
-    );
+    return wrap(<NewRankBadge />);
   }
 
   if (change === null || change === 0) {

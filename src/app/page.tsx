@@ -14,12 +14,15 @@ import { RANK_TYPE_LABELS } from "@/lib/constants";
 import { getDataSourceNote } from "@/lib/fetchers/rank-fetcher";
 import { uiText } from "@/lib/ui-text";
 import { cn, panelActionLinkClass, textLinkClass } from "@/lib/utils";
+import { createPageMetadata, SEO_PAGE_COPY } from "@/lib/site-seo";
 import {
   getDashboardStats,
   getNewEntries,
   getRankings,
   getRisingGames,
 } from "@/lib/services/rank-service";
+
+export const metadata = createPageMetadata(SEO_PAGE_COPY.home);
 
 export default async function HomePage() {
   const stats = await getDashboardStats("bestseller");
@@ -29,7 +32,7 @@ export default async function HomePage() {
 
   return (
     <div>
-      <PageHeader title="榜单概览" description={getDataSourceNote()} />
+      <PageHeader title="微信小游戏排行榜" description={getDataSourceNote()} />
 
       {!stats.latestDate ? (
         <EmptyState

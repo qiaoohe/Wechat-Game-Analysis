@@ -13,6 +13,9 @@ import {
   type RankType,
 } from "@/lib/constants";
 import { getAvailableDates, getRankings } from "@/lib/services/rank-service";
+import { createPageMetadata, SEO_PAGE_COPY } from "@/lib/site-seo";
+
+export const metadata = createPageMetadata(SEO_PAGE_COPY.rankings);
 
 interface RankingsPageProps {
   searchParams: Promise<{ type?: string; date?: string }>;

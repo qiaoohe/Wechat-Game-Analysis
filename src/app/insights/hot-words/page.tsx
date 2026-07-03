@@ -5,6 +5,9 @@ import { PageMetaLine } from "@/components/shared/page-meta-line";
 import { PAGE_DESCRIPTIONS } from "@/lib/constants";
 import { fetchHotWords } from "@/lib/fetchers/wechat-mp-insight-fetcher";
 import { getMpCookie } from "@/lib/fetchers/mp-client";
+import { createPageMetadata, SEO_PAGE_COPY } from "@/lib/site-seo";
+
+export const metadata = createPageMetadata(SEO_PAGE_COPY.hotWords);
 
 export default async function HotWordsPage() {
   if (!getMpCookie()) {

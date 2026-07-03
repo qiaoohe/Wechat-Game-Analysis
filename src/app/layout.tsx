@@ -1,7 +1,8 @@
-import type { Metadata, Viewport } from "next";
+import type { Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { createRootMetadata } from "@/lib/site-seo";
 
 import "./globals.css";
 
@@ -22,10 +23,7 @@ export const viewport: Viewport = {
   themeColor: "#e04d4e",
 };
 
-export const metadata: Metadata = {
-  title: "微信小游戏榜单监测",
-  description: "基于微信官方小游戏榜单数据的内部监测与整理平台",
-};
+export const metadata = createRootMetadata();
 
 export const dynamic = "force-dynamic";
 

@@ -12,6 +12,9 @@ import {
   type RankType,
 } from "@/lib/constants";
 import { getRisingGames } from "@/lib/services/rank-service";
+import { createPageMetadata, SEO_PAGE_COPY } from "@/lib/site-seo";
+
+export const metadata = createPageMetadata(SEO_PAGE_COPY.rising);
 
 interface RisingPageProps {
   searchParams: Promise<{ type?: string }>;

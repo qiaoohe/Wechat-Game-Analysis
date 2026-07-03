@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -14,6 +15,7 @@ import {
 } from "@/lib/constants";
 import { cn, mutedLinkClass } from "@/lib/utils";
 import { uiText } from "@/lib/ui-text";
+import { createPageMetadata } from "@/lib/site-seo";
 import {
   getGameById,
   getGameTrend,
@@ -27,6 +29,46 @@ interface GamePageProps {
 
 function isRankType(value?: string): value is RankType {
   return !!value && RANK_TYPES.includes(value as RankType);
+}
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: GamePageProps): Promise<Metadata> {
+  const { id } = await params;
+  const { type } = await searchParams;
+  const gameId = Number(id);
+  const rankType = isRankType(type) ? type : "bestseller";
+
+  if (Number.isNaN(gameId)) {
+    return createPageMetadata({
+      title: "游戏未找到",
+      description: "未找到对应的小游戏，请返回榜单页查看其他游戏。",
+      path: `/games/${id}`,
+      noIndex: true,
+    });
+  }
+
+  const game = await getGameById(gameId);
+  if (!game) {
+    return createPageMetadata({
+      title: "游戏未找到",
+      description: "未找到对应的小游戏，请返回榜单页查看其他游戏。",
+      path: `/games/${id}`,
+      noIndex: true,
+    });
+  }
+
+  const summary = game.category?.trim();
+  const description = summary
+    ? `${game.name}：${summary}。查看该游戏在${RANK_TYPE_LABELS[rankType]}中的排名、变化趋势与历史数据。`
+    : `查看 ${game.name} 在微信小游戏${RANK_TYPE_LABELS[rankType]}中的排名、变化趋势与历史数据。`;
+
+  return createPageMetadata({
+    title: game.name,
+    description,
+    path: `/games/${gameId}`,
+  });
 }
 
 export default async function GamePage({

@@ -12,6 +12,9 @@ import {
   IP_TREND_SORT_LABELS,
   type IpTrendSortType,
 } from "@/lib/fetchers/wechat-mp-insight-fetcher";
+import { createPageMetadata, SEO_PAGE_COPY } from "@/lib/site-seo";
+
+export const metadata = createPageMetadata(SEO_PAGE_COPY.ipTrends);
 
 interface IpTrendsPageProps {
   searchParams: Promise<{ sort?: string }>;
