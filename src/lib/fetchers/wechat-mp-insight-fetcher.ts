@@ -113,8 +113,8 @@ async function fetchStatRows(
   validate: (rows: MpStatRow[]) => boolean,
   maxDaysBack = 7,
 ) {
-  // MP 当日/昨日常返回占位行，从 T-2 起试更稳
-  for (let daysAgo = 2; daysAgo <= maxDaysBack; daysAgo++) {
+  // 当日 MP 常返回占位行；T-1 起通常已有完整数据
+  for (let daysAgo = 1; daysAgo <= maxDaysBack; daysAgo++) {
     const body = buildStatBody(statType, keyFieldIds, dataFieldId, daysAgo);
     try {
       const json = await mpPostJson<MpStatResponse>(STAT_API, body);
