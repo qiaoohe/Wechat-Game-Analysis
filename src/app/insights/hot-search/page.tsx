@@ -3,30 +3,14 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
 import { PageMetaLine } from "@/components/shared/page-meta-line";
 import { PAGE_DESCRIPTIONS } from "@/lib/constants";
-import { getMpCookie } from "@/lib/fetchers/mp-client";
 import { fetchHotSearchVisits } from "@/lib/fetchers/wechat-mp-insight-fetcher";
 import { createPageMetadata, SEO_PAGE_COPY } from "@/lib/site-seo";
 
 export const metadata = createPageMetadata(SEO_PAGE_COPY.hotSearch);
 
 export default async function HotSearchPage() {
-  if (!getMpCookie()) {
-    return (
-      <div>
-        <PageHeader
-          title="用户热搜并访问"
-          description={PAGE_DESCRIPTIONS.hotSearch}
-        />
-        <EmptyState
-          title="未配置 MP Cookie"
-          description="请在环境变量中设置 WECHAT_MP_COOKIE 后刷新页面。"
-        />
-      </div>
-    );
-  }
-
   try {
-    const { date, items } = await fetchHotSearchVisits();
+    const { date, items, source } = await fetchHotSearchVisits();
 
     return (
       <div>
@@ -46,6 +30,7 @@ export default async function HotSearchPage() {
               items={[
                 `数据日期 ${date || "—"}`,
                 `共 ${items.length} 款游戏`,
+                ...(source === "cache" ? ["缓存数据（MP Cookie 失效时展示）"] : []),
               ]}
             />
             <HotSearchTable items={items} />

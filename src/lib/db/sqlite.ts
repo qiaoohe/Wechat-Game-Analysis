@@ -58,6 +58,18 @@ export function initSqliteDatabase() {
       item_count INTEGER,
       created_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS insight_snapshots (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      insight_type TEXT NOT NULL,
+      data_date TEXT NOT NULL,
+      payload TEXT NOT NULL,
+      fetched_at TEXT NOT NULL,
+      UNIQUE(insight_type, data_date)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_insight_snapshots_type_date
+    ON insight_snapshots(insight_type, data_date DESC);
   `);
 
   try {

@@ -4,6 +4,7 @@ import {
   fetchAllRanks,
   getFetchConfigStatus,
 } from "@/lib/fetchers/rank-fetcher";
+import { fetchAndPersistInsights } from "@/lib/fetchers/wechat-mp-insight-fetcher";
 
 function isAuthorized(request: Request) {
   const secret = process.env.CRON_SECRET;
@@ -14,7 +15,15 @@ function isAuthorized(request: Request) {
 
 async function runFetch(date?: string) {
   const result = await fetchAllRanks(date);
-  return NextResponse.json(result, { status: result.success ? 200 : 502 });
+  const insights = await fetchAndPersistInsights();
+  const insightOk =
+    insights.hotWords.count > 0 || insights.hotSearch.count > 0;
+  const success = result.success || insightOk;
+
+  return NextResponse.json(
+    { ...result, insights, success },
+    { status: success ? 200 : 502 },
+  );
 }
 
 /** 查看状态；Vercel Cron 带授权 GET 时自动抓取；本地可用 ?trigger=1 */

@@ -1,6 +1,15 @@
 import { unstable_cache } from "next/cache";
 
-import { mpPostJson, startOfDayTimestamp } from "@/lib/fetchers/mp-client";
+import {
+  getMpCookie,
+  isMpSessionError,
+  mpPostJson,
+  startOfDayTimestamp,
+} from "@/lib/fetchers/mp-client";
+import {
+  getLatestInsightSnapshot,
+  saveInsightSnapshot,
+} from "@/lib/services/insight-service";
 import type {
   HotSearchVisitItem,
   HotWordItem,
@@ -135,10 +144,7 @@ async function fetchStatRows(
   return { date: "", rows: [] as MpStatRow[] };
 }
 
-export async function fetchHotWords(): Promise<{
-  date: string;
-  items: HotWordItem[];
-}> {
+async function fetchHotWordsFromMp() {
   const { date, rows } = await fetchStatRows(
     1000402,
     [10, 11, 12],
@@ -163,10 +169,7 @@ export async function fetchHotWords(): Promise<{
   return { date, items };
 }
 
-export async function fetchHotSearchVisits(): Promise<{
-  date: string;
-  items: HotSearchVisitItem[];
-}> {
+async function fetchHotSearchFromMp() {
   const { date, rows } = await fetchStatRows(
     1000403,
     [14, 16, 17, 18],
@@ -191,6 +194,126 @@ export async function fetchHotSearchVisits(): Promise<{
     .filter((item) => item !== null) as HotSearchVisitItem[];
 
   return { date, items };
+}
+
+export type InsightDataSource = "live" | "cache";
+
+export async function fetchHotWords(): Promise<{
+  date: string;
+  items: HotWordItem[];
+  source: InsightDataSource;
+}> {
+  if (getMpCookie()) {
+    try {
+      const live = await fetchHotWordsFromMp();
+      if (live.items.length > 0) {
+        await saveInsightSnapshot("hot_words", live.date, live.items);
+        return { ...live, source: "live" };
+      }
+    } catch (error) {
+      if (!isMpSessionError(error)) {
+        throw error;
+      }
+    }
+  }
+
+  const cached = await getLatestInsightSnapshot("hot_words");
+  if (cached) {
+    return {
+      date: cached.dataDate,
+      items: cached.items,
+      source: "cache",
+    };
+  }
+
+  throw new Error(
+    getMpCookie()
+      ? "MP Cookie 已失效且暂无缓存数据，请更新 WECHAT_MP_COOKIE 后重新抓取"
+      : "未配置 WECHAT_MP_COOKIE，且暂无缓存数据",
+  );
+}
+
+export async function fetchHotSearchVisits(): Promise<{
+  date: string;
+  items: HotSearchVisitItem[];
+  source: InsightDataSource;
+}> {
+  if (getMpCookie()) {
+    try {
+      const live = await fetchHotSearchFromMp();
+      if (live.items.length > 0) {
+        await saveInsightSnapshot("hot_search", live.date, live.items);
+        return { ...live, source: "live" };
+      }
+    } catch (error) {
+      if (!isMpSessionError(error)) {
+        throw error;
+      }
+    }
+  }
+
+  const cached = await getLatestInsightSnapshot("hot_search");
+  if (cached) {
+    return {
+      date: cached.dataDate,
+      items: cached.items,
+      source: "cache",
+    };
+  }
+
+  throw new Error(
+    getMpCookie()
+      ? "MP Cookie 已失效且暂无缓存数据，请更新 WECHAT_MP_COOKIE 后重新抓取"
+      : "未配置 WECHAT_MP_COOKIE，且暂无缓存数据",
+  );
+}
+
+export interface InsightFetchResult {
+  hotWords: { count: number; date: string; error?: string };
+  hotSearch: { count: number; date: string; error?: string };
+}
+
+/** Cron 抓取：从 MP 拉取热搜词/热搜访问并写入数据库 */
+export async function fetchAndPersistInsights(): Promise<InsightFetchResult> {
+  const result: InsightFetchResult = {
+    hotWords: { count: 0, date: "" },
+    hotSearch: { count: 0, date: "" },
+  };
+
+  if (!getMpCookie()) {
+    const message = "未配置 WECHAT_MP_COOKIE";
+    result.hotWords.error = message;
+    result.hotSearch.error = message;
+    return result;
+  }
+
+  try {
+    const live = await fetchHotWordsFromMp();
+    if (live.items.length > 0) {
+      await saveInsightSnapshot("hot_words", live.date, live.items);
+      result.hotWords = { count: live.items.length, date: live.date };
+    } else {
+      result.hotWords.error = "暂无热搜词数据";
+    }
+  } catch (error) {
+    result.hotWords.error =
+      error instanceof Error ? error.message : "热搜词抓取失败";
+  }
+
+  try {
+    const live = await fetchHotSearchFromMp();
+    if (live.items.length > 0) {
+      await saveInsightSnapshot("hot_search", live.date, live.items);
+      result.hotSearch = { count: live.items.length, date: live.date };
+    } else {
+      result.hotSearch.error = "暂无热搜访问数据";
+    }
+  } catch (error) {
+    result.hotSearch.error =
+      error instanceof Error ? error.message : "热搜访问抓取失败";
+  }
+
+  return result;
 }
 
 function formatWxIndex(value: number) {

@@ -82,6 +82,16 @@ export async function mpPostJson<T>(
   return json;
 }
 
+export function isMpSessionError(error: unknown) {
+  return (
+    error instanceof Error &&
+    (error.message.includes("40042") ||
+      error.message.includes("invalid plugin session") ||
+      error.message.includes("40001") ||
+      error.message.includes("API_Invalid_Credential"))
+  );
+}
+
 const CHINA_TIMEZONE = "Asia/Shanghai";
 
 const chinaYmdFormatter = new Intl.DateTimeFormat("en-CA", {

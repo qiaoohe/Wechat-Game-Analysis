@@ -4,29 +4,13 @@ import { PageHeader } from "@/components/shared/page-header";
 import { PageMetaLine } from "@/components/shared/page-meta-line";
 import { PAGE_DESCRIPTIONS } from "@/lib/constants";
 import { fetchHotWords } from "@/lib/fetchers/wechat-mp-insight-fetcher";
-import { getMpCookie } from "@/lib/fetchers/mp-client";
 import { createPageMetadata, SEO_PAGE_COPY } from "@/lib/site-seo";
 
 export const metadata = createPageMetadata(SEO_PAGE_COPY.hotWords);
 
 export default async function HotWordsPage() {
-  if (!getMpCookie()) {
-    return (
-      <div>
-        <PageHeader
-          title="热搜词"
-          description={PAGE_DESCRIPTIONS.hotWords}
-        />
-        <EmptyState
-          title="未配置 MP Cookie"
-          description="请在环境变量中设置 WECHAT_MP_COOKIE 后刷新页面。"
-        />
-      </div>
-    );
-  }
-
   try {
-    const { date, items } = await fetchHotWords();
+    const { date, items, source } = await fetchHotWords();
 
     return (
       <div>
@@ -46,6 +30,7 @@ export default async function HotWordsPage() {
               items={[
                 `数据日期 ${date || "—"}`,
                 `共 ${items.length} 个热搜词`,
+                ...(source === "cache" ? ["缓存数据（MP Cookie 失效时展示）"] : []),
               ]}
             />
             <HotWordList items={items} />

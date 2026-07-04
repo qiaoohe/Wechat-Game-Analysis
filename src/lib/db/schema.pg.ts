@@ -40,6 +40,19 @@ export const fetchLogs = pgTable("fetch_logs", {
   createdAt: text("created_at").notNull(),
 });
 
+export const insightSnapshots = pgTable(
+  "insight_snapshots",
+  {
+    id: serial("id").primaryKey(),
+    insightType: text("insight_type").notNull(),
+    dataDate: text("data_date").notNull(),
+    payload: text("payload").notNull(),
+    fetchedAt: text("fetched_at").notNull(),
+  },
+  (table) => [unique().on(table.insightType, table.dataDate)],
+);
+
 export type Game = typeof games.$inferSelect;
 export type RankSnapshot = typeof rankSnapshots.$inferSelect;
 export type FetchLog = typeof fetchLogs.$inferSelect;
+export type InsightSnapshot = typeof insightSnapshots.$inferSelect;
