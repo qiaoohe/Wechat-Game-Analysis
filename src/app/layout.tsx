@@ -2,7 +2,6 @@ import type { Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 
-import { GoogleAnalyticsHeadScripts } from "@/components/analytics/google-analytics";
 import { GoogleAnalyticsPageView } from "@/components/analytics/google-analytics-pageview";
 import { AppShell } from "@/components/layout/app-shell";
 import { RouteLoadingBar } from "@/components/layout/route-loading-bar";
@@ -43,9 +42,6 @@ export default function RootLayout({
       lang="zh-CN"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <head>
-        <GoogleAnalyticsHeadScripts />
-      </head>
       <body className="min-h-full">
         <Suspense fallback={null}>
           <GoogleAnalyticsPageView />

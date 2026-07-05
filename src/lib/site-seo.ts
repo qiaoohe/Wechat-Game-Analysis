@@ -5,8 +5,8 @@ import { PAGE_DESCRIPTIONS } from "@/lib/constants";
 /** 站点品牌名（浏览器标题、Open Graph 等） */
 export const SITE_NAME = "微信小游戏排行榜";
 
-/** 线上域名 */
-export const SITE_DOMAIN = "momorank.com";
+/** 线上域名（Vercel 将 momorank.com 308 到 www，GA 检测须用实际提供 HTML 的域名） */
+export const SITE_DOMAIN = "www.momorank.com";
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
