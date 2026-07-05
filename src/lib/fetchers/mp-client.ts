@@ -101,6 +101,11 @@ const chinaYmdFormatter = new Intl.DateTimeFormat("en-CA", {
   day: "2-digit",
 });
 
+/** 当前北京时间日历日 YYYY-MM-DD */
+export function getChinaTodayYmd(): string {
+  return chinaYmdFormatter.format(new Date());
+}
+
 /** MP 统计接口要求的北京时间 00:00:00 时间戳（秒） */
 export function startOfDayTimestamp(daysAgo = 0): number {
   const todayYmd = chinaYmdFormatter.format(new Date());

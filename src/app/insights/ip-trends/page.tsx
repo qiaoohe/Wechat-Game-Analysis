@@ -15,6 +15,7 @@ import {
   type IpTrendSortType,
 } from "@/lib/fetchers/wechat-mp-insight-fetcher";
 import { createPageMetadata, SEO_PAGE_COPY } from "@/lib/site-seo";
+import { buildInsightMetaItems } from "@/lib/utils/insight-meta";
 
 export const metadata = createPageMetadata(SEO_PAGE_COPY.ipTrends);
 
@@ -58,6 +59,7 @@ export default async function IpTrendsPage({ searchParams }: IpTrendsPageProps) 
       page: currentPage,
       pageSize,
       totalPages,
+      dataDate,
     } = await fetchIpTrends(sort, page);
 
     const rangeStart =
@@ -86,10 +88,14 @@ export default async function IpTrendsPage({ searchParams }: IpTrendsPageProps) 
           <>
             <PageMetaLine
               items={[
+                ...buildInsightMetaItems({
+                  dataDate,
+                  countLabel:
+                    items.length > 0
+                      ? `第 ${rangeStart}–${rangeEnd} 名 · 共 ${totalCount} 个 IP`
+                      : `共 ${totalCount} 个 IP`,
+                }),
                 IP_TREND_SORT_LABELS[sort],
-                items.length > 0
-                  ? `第 ${rangeStart}–${rangeEnd} 名 · 共 ${totalCount} 个 IP`
-                  : `共 ${totalCount} 个 IP`,
               ]}
             />
             <IpTrendTable items={items} />

@@ -5,12 +5,13 @@ import { PageMetaLine } from "@/components/shared/page-meta-line";
 import { PAGE_DESCRIPTIONS } from "@/lib/constants";
 import { fetchHotWords } from "@/lib/fetchers/wechat-mp-insight-fetcher";
 import { createPageMetadata, SEO_PAGE_COPY } from "@/lib/site-seo";
+import { buildInsightMetaItems } from "@/lib/utils/insight-meta";
 
 export const metadata = createPageMetadata(SEO_PAGE_COPY.hotWords);
 
 export default async function HotWordsPage() {
   try {
-    const { date, items, source } = await fetchHotWords();
+    const { date, items, source, fetchedAt } = await fetchHotWords();
 
     return (
       <div>
@@ -27,11 +28,12 @@ export default async function HotWordsPage() {
         ) : (
           <>
             <PageMetaLine
-              items={[
-                `数据日期 ${date || "—"}`,
-                `共 ${items.length} 个热搜词`,
-                ...(source === "cache" ? ["缓存数据（MP Cookie 失效时展示）"] : []),
-              ]}
+              items={buildInsightMetaItems({
+                dataDate: date,
+                countLabel: `共 ${items.length} 个热搜词`,
+                fetchedAt,
+                source,
+              })}
             />
             <HotWordList items={items} />
           </>

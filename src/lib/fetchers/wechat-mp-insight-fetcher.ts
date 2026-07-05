@@ -1,5 +1,3 @@
-import { unstable_cache } from "next/cache";
-
 import {
   getMpCookie,
   isMpSessionError,
@@ -122,8 +120,8 @@ async function fetchStatRows(
   validate: (rows: MpStatRow[]) => boolean,
   maxDaysBack = 7,
 ) {
-  // 当日 MP 常返回占位行；T-1 起通常已有完整数据
-  for (let daysAgo = 1; daysAgo <= maxDaysBack; daysAgo++) {
+  // 优先取当日；若 MP 仍返回占位行则回退到 T-1、T-2…
+  for (let daysAgo = 0; daysAgo <= maxDaysBack; daysAgo++) {
     const body = buildStatBody(statType, keyFieldIds, dataFieldId, daysAgo);
     try {
       const json = await mpPostJson<MpStatResponse>(STAT_API, body);
@@ -202,13 +200,15 @@ export async function fetchHotWords(): Promise<{
   date: string;
   items: HotWordItem[];
   source: InsightDataSource;
+  fetchedAt: string;
 }> {
   if (getMpCookie()) {
     try {
       const live = await fetchHotWordsFromMp();
       if (live.items.length > 0) {
+        const fetchedAt = new Date().toISOString();
         await saveInsightSnapshot("hot_words", live.date, live.items);
-        return { ...live, source: "live" };
+        return { ...live, source: "live", fetchedAt };
       }
     } catch (error) {
       if (!isMpSessionError(error)) {
@@ -223,6 +223,7 @@ export async function fetchHotWords(): Promise<{
       date: cached.dataDate,
       items: cached.items,
       source: "cache",
+      fetchedAt: cached.fetchedAt,
     };
   }
 
@@ -237,13 +238,15 @@ export async function fetchHotSearchVisits(): Promise<{
   date: string;
   items: HotSearchVisitItem[];
   source: InsightDataSource;
+  fetchedAt: string;
 }> {
   if (getMpCookie()) {
     try {
       const live = await fetchHotSearchFromMp();
       if (live.items.length > 0) {
+        const fetchedAt = new Date().toISOString();
         await saveInsightSnapshot("hot_search", live.date, live.items);
-        return { ...live, source: "live" };
+        return { ...live, source: "live", fetchedAt };
       }
     } catch (error) {
       if (!isMpSessionError(error)) {
@@ -258,6 +261,7 @@ export async function fetchHotSearchVisits(): Promise<{
       date: cached.dataDate,
       items: cached.items,
       source: "cache",
+      fetchedAt: cached.fetchedAt,
     };
   }
 
@@ -401,11 +405,16 @@ async function fetchAllIpRawItemsUncached(): Promise<{
   return { list, totalCount };
 }
 
-const fetchAllIpRawItems = unstable_cache(
-  fetchAllIpRawItemsUncached,
-  ["mp-ip-cooperation-all"],
-  { revalidate: 900 },
-);
+function resolveIpDataDate(items: MpIpItem[]): string {
+  let latest = "";
+  for (const item of items) {
+    const date = item.wxindex_time?.slice(0, 10);
+    if (date && date > latest) {
+      latest = date;
+    }
+  }
+  return latest;
+}
 
 export async function fetchIpTrends(
   orderType: IpTrendSortType = 4,
@@ -417,8 +426,9 @@ export async function fetchIpTrends(
   page: number;
   pageSize: number;
   totalPages: number;
+  dataDate: string;
 }> {
-  const { list, totalCount } = await fetchAllIpRawItems();
+  const { list, totalCount } = await fetchAllIpRawItemsUncached();
   const sorted = sortIpItems(list, orderType);
   const safePage = Math.min(
     Math.max(1, page),
@@ -427,11 +437,14 @@ export async function fetchIpTrends(
   const start = (safePage - 1) * pageSize;
   const slice = sorted.slice(start, start + pageSize);
 
+  const items = slice.map((item, index) => mapIpItem(item, start + index + 1));
+
   return {
-    items: slice.map((item, index) => mapIpItem(item, start + index + 1)),
+    items,
     totalCount: sorted.length || totalCount,
     page: safePage,
     pageSize,
     totalPages: Math.max(1, Math.ceil(sorted.length / pageSize)),
+    dataDate: resolveIpDataDate(sorted),
   };
 }

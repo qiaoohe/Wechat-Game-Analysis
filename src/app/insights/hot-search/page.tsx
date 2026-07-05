@@ -5,12 +5,13 @@ import { PageMetaLine } from "@/components/shared/page-meta-line";
 import { PAGE_DESCRIPTIONS } from "@/lib/constants";
 import { fetchHotSearchVisits } from "@/lib/fetchers/wechat-mp-insight-fetcher";
 import { createPageMetadata, SEO_PAGE_COPY } from "@/lib/site-seo";
+import { buildInsightMetaItems } from "@/lib/utils/insight-meta";
 
 export const metadata = createPageMetadata(SEO_PAGE_COPY.hotSearch);
 
 export default async function HotSearchPage() {
   try {
-    const { date, items, source } = await fetchHotSearchVisits();
+    const { date, items, source, fetchedAt } = await fetchHotSearchVisits();
 
     return (
       <div>
@@ -27,11 +28,12 @@ export default async function HotSearchPage() {
         ) : (
           <>
             <PageMetaLine
-              items={[
-                `数据日期 ${date || "—"}`,
-                `共 ${items.length} 款游戏`,
-                ...(source === "cache" ? ["缓存数据（MP Cookie 失效时展示）"] : []),
-              ]}
+              items={buildInsightMetaItems({
+                dataDate: date,
+                countLabel: `共 ${items.length} 款游戏`,
+                fetchedAt,
+                source,
+              })}
             />
             <HotSearchTable items={items} />
           </>
