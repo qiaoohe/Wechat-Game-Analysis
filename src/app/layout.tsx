@@ -2,7 +2,7 @@ import type { Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 
-import { GoogleAnalyticsPageView } from "@/components/analytics/google-analytics-pageview";
+import { UmamiAnalytics } from "@/components/analytics/umami-analytics";
 import { AppShell } from "@/components/layout/app-shell";
 import { RouteLoadingBar } from "@/components/layout/route-loading-bar";
 import { createRootMetadata } from "@/lib/site-seo";
@@ -44,12 +44,10 @@ export default function RootLayout({
     >
       <body className="min-h-full">
         <Suspense fallback={null}>
-          <GoogleAnalyticsPageView />
-        </Suspense>
-        <Suspense fallback={null}>
           <RouteLoadingBar />
         </Suspense>
         <AppShell>{children}</AppShell>
+        <UmamiAnalytics />
       </body>
     </html>
   );
