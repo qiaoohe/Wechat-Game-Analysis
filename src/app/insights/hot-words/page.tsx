@@ -11,7 +11,7 @@ export const metadata = createPageMetadata(SEO_PAGE_COPY.hotWords);
 
 export default async function HotWordsPage() {
   try {
-    const { date, items, source, fetchedAt } = await fetchHotWords();
+    const { date, items, fetchedAt } = await fetchHotWords();
 
     return (
       <div>
@@ -32,7 +32,6 @@ export default async function HotWordsPage() {
                 dataDate: date,
                 countLabel: `共 ${items.length} 个热搜词`,
                 fetchedAt,
-                source,
               })}
             />
             <HotWordList items={items} />

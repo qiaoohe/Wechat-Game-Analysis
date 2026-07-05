@@ -15,7 +15,6 @@ export function buildInsightMetaItems(options: {
   dataDate: string;
   countLabel: string;
   fetchedAt?: string;
-  source?: "live" | "cache";
 }) {
   const items = [
     `数据日期 ${options.dataDate || "—"}`,
@@ -31,10 +30,6 @@ export function buildInsightMetaItems(options: {
     options.dataDate < getChinaTodayYmd()
   ) {
     items.push("微信 MP 热搜统计通常比榜单晚 1 天");
-  }
-
-  if (options.source === "cache") {
-    items.push("缓存数据（MP Cookie 失效时展示）");
   }
 
   return items;

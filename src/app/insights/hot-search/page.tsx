@@ -11,7 +11,7 @@ export const metadata = createPageMetadata(SEO_PAGE_COPY.hotSearch);
 
 export default async function HotSearchPage() {
   try {
-    const { date, items, source, fetchedAt } = await fetchHotSearchVisits();
+    const { date, items, fetchedAt } = await fetchHotSearchVisits();
 
     return (
       <div>
@@ -32,7 +32,6 @@ export default async function HotSearchPage() {
                 dataDate: date,
                 countLabel: `共 ${items.length} 款游戏`,
                 fetchedAt,
-                source,
               })}
             />
             <HotSearchTable items={items} />
