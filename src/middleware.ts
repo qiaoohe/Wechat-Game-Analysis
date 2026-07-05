@@ -11,7 +11,7 @@ export const config = {
   ],
 };
 
-/** 将 Google 官方 gtag 片段插入 HTML <head> 起始处，满足 GA 安装检测要求 */
+/** 将 Google 官方 gtag 片段原样插入 <head> 起始处（GA 安装检测只认标准 HTML） */
 export async function middleware(request: NextRequest) {
   if (request.headers.get(SKIP_HEADER) === "1") {
     return NextResponse.next();
@@ -37,12 +37,7 @@ export async function middleware(request: NextRequest) {
   }
 
   const html = await response.text();
-  if (!/<head[^>]*>/i.test(html)) {
-    return response;
-  }
-
-  // 避免重复注入
-  if (html.includes(GOOGLE_TAG_HEAD_SNIPPET)) {
+  if (!/<head[^>]*>/i.test(html) || html.includes(GOOGLE_TAG_HEAD_SNIPPET)) {
     return response;
   }
 
