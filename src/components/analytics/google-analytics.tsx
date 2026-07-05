@@ -1,30 +1,26 @@
-import Script from "next/script";
-
 /** Google Analytics 4 测量 ID */
 export const GA_MEASUREMENT_ID = "G-EZ3ZQS0KWP";
 
+const GA_INLINE_SCRIPT = `
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '${GA_MEASUREMENT_ID}');
+`;
+
 /**
- * 使用 beforeInteractive，让 gtag 写入服务端 HTML 的 <head>，
- * 以便 Google Analytics「安装代码」检测工具能识别（afterInteractive 仅客户端注入）。
- * @see https://nextjs.org/docs/app/api-reference/components/script#beforeinteractive
- * @see https://nextjs.org/docs/app/guides/third-party-libraries#google-analytics
+ * Google 官方 gtag 片段，原样放入 <head> 紧后位置。
+ * 不使用 next/script，确保检测工具能在 HTML 源码中直接看到标准 script 标签。
  */
-export function GoogleAnalytics() {
+export function GoogleAnalyticsHeadScripts() {
   return (
     <>
-      <Script
-        id="google-analytics-gtag"
+      {/* Google tag (gtag.js) */}
+      <script
+        async
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-        strategy="beforeInteractive"
       />
-      <Script id="google-analytics-config" strategy="beforeInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${GA_MEASUREMENT_ID}');
-        `}
-      </Script>
+      <script dangerouslySetInnerHTML={{ __html: GA_INLINE_SCRIPT }} />
     </>
   );
 }
