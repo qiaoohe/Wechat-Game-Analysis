@@ -1,6 +1,9 @@
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 import { GOOGLE_TAG_HEAD_SNIPPET } from "@/lib/analytics/google-tag";
+
+const SKIP_HEADER = "x-gtag-inject-skip";
 
 export const config = {
   matcher: [
@@ -9,11 +12,27 @@ export const config = {
 };
 
 /**
- * Google 要求 gtag 紧接在 <head> 之后；Next.js 默认会把 script 排在内部 chunk 后面。
- * 在 Edge Middleware 里把官方片段插入 <head> 起始位置，供 Google 安装检测识别。
+ * 在 <head> 起始处插入 Google 官方 gtag 片段。
+ * 内部 fetch 须带 SKIP_HEADER，避免 middleware 无限循环。
  */
 export async function middleware(request: NextRequest) {
-  const response = await fetch(request);
+  if (request.headers.get(SKIP_HEADER) === "1") {
+    return NextResponse.next();
+  }
+
+  const headers = new Headers(request.headers);
+  headers.set(SKIP_HEADER, "1");
+
+  const response = await fetch(
+    new Request(request.url, {
+      method: request.method,
+      headers,
+      body:
+        request.method !== "GET" && request.method !== "HEAD"
+          ? request.body
+          : undefined,
+    }),
+  );
 
   const contentType = response.headers.get("content-type") ?? "";
   if (response.status !== 200 || !contentType.includes("text/html")) {
@@ -30,12 +49,12 @@ export async function middleware(request: NextRequest) {
     `<head$1>${GOOGLE_TAG_HEAD_SNIPPET}`,
   );
 
-  const headers = new Headers(response.headers);
-  headers.delete("content-length");
-  headers.delete("content-encoding");
+  const outHeaders = new Headers(response.headers);
+  outHeaders.delete("content-length");
+  outHeaders.delete("content-encoding");
 
   return new Response(updated, {
     status: response.status,
-    headers,
+    headers: outHeaders,
   });
 }
