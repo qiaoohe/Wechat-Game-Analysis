@@ -11,10 +11,7 @@ export const config = {
   ],
 };
 
-/**
- * 在 <head> 起始处插入 Google 官方 gtag 片段。
- * 内部 fetch 须带 SKIP_HEADER，避免 middleware 无限循环。
- */
+/** 将 Google 官方 gtag 片段插入 HTML <head> 起始处，满足 GA 安装检测要求 */
 export async function middleware(request: NextRequest) {
   if (request.headers.get(SKIP_HEADER) === "1") {
     return NextResponse.next();
@@ -41,6 +38,11 @@ export async function middleware(request: NextRequest) {
 
   const html = await response.text();
   if (!/<head[^>]*>/i.test(html)) {
+    return response;
+  }
+
+  // 避免重复注入
+  if (html.includes(GOOGLE_TAG_HEAD_SNIPPET)) {
     return response;
   }
 
