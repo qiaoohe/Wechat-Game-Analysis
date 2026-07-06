@@ -110,3 +110,15 @@ export interface IpTrendItem {
   tags: string[];
   updatedAt?: string;
 }
+
+/** IP 热度快照原始字段（与 MP 接口一致，用于缓存与重排） */
+export interface IpTrendsCacheItem {
+  id?: number;
+  ip_name?: string;
+  ip_desc?: string;
+  ip_icon?: string;
+  wxindex?: number;
+  wxindex_change?: number;
+  style_list?: string;
+  wxindex_time?: string;
+}

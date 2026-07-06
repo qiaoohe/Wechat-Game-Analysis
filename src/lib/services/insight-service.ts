@@ -1,13 +1,15 @@
 import { desc, eq } from "drizzle-orm";
 
 import { db, initDatabase, insightSnapshots } from "@/lib/db";
-import type { HotSearchVisitItem, HotWordItem } from "@/lib/types";
+import type { HotSearchVisitItem, HotWordItem, IpTrendsCacheItem } from "@/lib/types";
 
-export type InsightType = "hot_words" | "hot_search";
+export type InsightType = "hot_words" | "hot_search" | "ip_trends";
 
 type InsightItems<T extends InsightType> = T extends "hot_words"
   ? HotWordItem[]
-  : HotSearchVisitItem[];
+  : T extends "hot_search"
+    ? HotSearchVisitItem[]
+    : IpTrendsCacheItem[];
 
 async function ensureDb() {
   await initDatabase();

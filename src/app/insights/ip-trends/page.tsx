@@ -8,7 +8,6 @@ import { TabsLoadingFallback } from "@/components/shared/page-loading";
 import { PageHeader } from "@/components/shared/page-header";
 import { PageMetaLine } from "@/components/shared/page-meta-line";
 import { PAGE_DESCRIPTIONS } from "@/lib/constants";
-import { getMpCookie } from "@/lib/fetchers/mp-client";
 import {
   fetchIpTrends,
   IP_TREND_SORT_LABELS,
@@ -37,21 +36,6 @@ export default async function IpTrendsPage({ searchParams }: IpTrendsPageProps) 
   const sort = parseSort(sortParam);
   const page = parsePage(pageParam);
 
-  if (!getMpCookie()) {
-    return (
-      <div>
-        <PageHeader
-          title="合作 IP 热度趋势"
-          description={PAGE_DESCRIPTIONS.ipTrends}
-        />
-        <EmptyState
-          title="未配置 MP Cookie"
-          description="请在环境变量中设置 WECHAT_MP_COOKIE 后刷新页面。"
-        />
-      </div>
-    );
-  }
-
   try {
     const {
       items,
@@ -60,6 +44,7 @@ export default async function IpTrendsPage({ searchParams }: IpTrendsPageProps) 
       pageSize,
       totalPages,
       dataDate,
+      fetchedAt,
     } = await fetchIpTrends(sort, page);
 
     const rangeStart =
@@ -94,6 +79,7 @@ export default async function IpTrendsPage({ searchParams }: IpTrendsPageProps) 
                     items.length > 0
                       ? `第 ${rangeStart}–${rangeEnd} 名 · 共 ${totalCount} 个 IP`
                       : `共 ${totalCount} 个 IP`,
+                  fetchedAt,
                 }),
                 IP_TREND_SORT_LABELS[sort],
               ]}

@@ -12,6 +12,7 @@ import type {
   HotSearchVisitItem,
   HotWordItem,
   IpTrendItem,
+  IpTrendsCacheItem,
 } from "@/lib/types";
 import { normalizeIconUrl } from "@/lib/utils/icon";
 
@@ -39,16 +40,7 @@ interface MpStatResponse {
   };
 }
 
-interface MpIpItem {
-  id?: number;
-  ip_name?: string;
-  ip_desc?: string;
-  ip_icon?: string;
-  wxindex?: number;
-  wxindex_change?: number;
-  style_list?: string;
-  wxindex_time?: string;
-}
+interface MpIpItem extends IpTrendsCacheItem {}
 
 interface MpIpListResponse {
   data?: {
@@ -275,19 +267,22 @@ export async function fetchHotSearchVisits(): Promise<{
 export interface InsightFetchResult {
   hotWords: { count: number; date: string; error?: string };
   hotSearch: { count: number; date: string; error?: string };
+  ipTrends: { count: number; date: string; error?: string };
 }
 
-/** Cron 抓取：从 MP 拉取热搜词/热搜访问并写入数据库 */
+/** Cron 抓取：从 MP 拉取热搜词/热搜访问/IP 热度并写入数据库 */
 export async function fetchAndPersistInsights(): Promise<InsightFetchResult> {
   const result: InsightFetchResult = {
     hotWords: { count: 0, date: "" },
     hotSearch: { count: 0, date: "" },
+    ipTrends: { count: 0, date: "" },
   };
 
   if (!getMpCookie()) {
     const message = "未配置 WECHAT_MP_COOKIE";
     result.hotWords.error = message;
     result.hotSearch.error = message;
+    result.ipTrends.error = message;
     return result;
   }
 
@@ -315,6 +310,20 @@ export async function fetchAndPersistInsights(): Promise<InsightFetchResult> {
   } catch (error) {
     result.hotSearch.error =
       error instanceof Error ? error.message : "热搜访问抓取失败";
+  }
+
+  try {
+    const { list } = await fetchAllIpRawItemsUncached();
+    if (list.length > 0) {
+      const dataDate = resolveIpDataDate(list);
+      await saveInsightSnapshot("ip_trends", dataDate, list);
+      result.ipTrends = { count: list.length, date: dataDate };
+    } else {
+      result.ipTrends.error = "暂无 IP 热度数据";
+    }
+  } catch (error) {
+    result.ipTrends.error =
+      error instanceof Error ? error.message : "IP 热度抓取失败";
   }
 
   return result;
@@ -416,6 +425,32 @@ function resolveIpDataDate(items: MpIpItem[]): string {
   return latest;
 }
 
+function paginateIpTrends(
+  list: MpIpItem[],
+  orderType: IpTrendSortType,
+  page: number,
+  pageSize: number,
+  totalCountHint?: number,
+) {
+  const sorted = sortIpItems(list, orderType);
+  const safePage = Math.min(
+    Math.max(1, page),
+    Math.max(1, Math.ceil(sorted.length / pageSize)),
+  );
+  const start = (safePage - 1) * pageSize;
+  const slice = sorted.slice(start, start + pageSize);
+  const items = slice.map((item, index) => mapIpItem(item, start + index + 1));
+
+  return {
+    items,
+    totalCount: sorted.length || totalCountHint || 0,
+    page: safePage,
+    pageSize,
+    totalPages: Math.max(1, Math.ceil(sorted.length / pageSize)),
+    dataDate: resolveIpDataDate(sorted),
+  };
+}
+
 export async function fetchIpTrends(
   orderType: IpTrendSortType = 4,
   page = 1,
@@ -427,24 +462,46 @@ export async function fetchIpTrends(
   pageSize: number;
   totalPages: number;
   dataDate: string;
+  source: InsightDataSource;
+  fetchedAt: string;
 }> {
-  const { list, totalCount } = await fetchAllIpRawItemsUncached();
-  const sorted = sortIpItems(list, orderType);
-  const safePage = Math.min(
-    Math.max(1, page),
-    Math.max(1, Math.ceil(sorted.length / pageSize)),
+  if (getMpCookie()) {
+    try {
+      const { list, totalCount } = await fetchAllIpRawItemsUncached();
+      if (list.length > 0) {
+        const fetchedAt = new Date().toISOString();
+        const dataDate = resolveIpDataDate(list);
+        await saveInsightSnapshot("ip_trends", dataDate, list);
+        return {
+          ...paginateIpTrends(list, orderType, page, pageSize, totalCount),
+          source: "live",
+          fetchedAt,
+        };
+      }
+    } catch (error) {
+      if (!isMpSessionError(error)) {
+        throw error;
+      }
+    }
+  }
+
+  const cached = await getLatestInsightSnapshot("ip_trends");
+  if (cached) {
+    return {
+      ...paginateIpTrends(
+        cached.items as MpIpItem[],
+        orderType,
+        page,
+        pageSize,
+      ),
+      source: "cache",
+      fetchedAt: cached.fetchedAt,
+    };
+  }
+
+  throw new Error(
+    getMpCookie()
+      ? "MP Cookie 已失效且暂无缓存数据，请更新 WECHAT_MP_COOKIE 后重新抓取"
+      : "未配置 WECHAT_MP_COOKIE，且暂无 IP 热度缓存数据",
   );
-  const start = (safePage - 1) * pageSize;
-  const slice = sorted.slice(start, start + pageSize);
-
-  const items = slice.map((item, index) => mapIpItem(item, start + index + 1));
-
-  return {
-    items,
-    totalCount: sorted.length || totalCount,
-    page: safePage,
-    pageSize,
-    totalPages: Math.max(1, Math.ceil(sorted.length / pageSize)),
-    dataDate: resolveIpDataDate(sorted),
-  };
 }

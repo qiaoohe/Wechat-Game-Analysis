@@ -17,7 +17,9 @@ async function runFetch(date?: string) {
   const result = await fetchAllRanks(date);
   const insights = await fetchAndPersistInsights();
   const insightOk =
-    insights.hotWords.count > 0 || insights.hotSearch.count > 0;
+    insights.hotWords.count > 0 ||
+    insights.hotSearch.count > 0 ||
+    insights.ipTrends.count > 0;
   const success = result.success || insightOk;
 
   return NextResponse.json(
