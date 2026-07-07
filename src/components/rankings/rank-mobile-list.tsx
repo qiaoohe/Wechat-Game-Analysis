@@ -7,7 +7,7 @@ import { RankLabelBadges } from "@/components/rankings/rank-label-badges";
 import type { RankEntry } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-function RankNumber({ rank }: { rank: number }) {
+export function RankNumber({ rank }: { rank: number }) {
   return (
     <span
       className={cn(
