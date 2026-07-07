@@ -67,16 +67,28 @@ export async function getLatestDate(): Promise<string | null> {
   return dates[0] ?? null;
 }
 
-async function getPreviousDate(date: string): Promise<string | null> {
-  const dates = await getAvailableDates();
+function previousDateFrom(dates: string[], date: string): string | null {
   const index = dates.indexOf(date);
-  return dates[index + 1] ?? null;
+  return index >= 0 ? (dates[index + 1] ?? null) : null;
 }
 
-async function getDateDaysAgo(date: string, days: number): Promise<string | null> {
-  const dates = await getAvailableDates();
+function dateDaysAgoFrom(dates: string[], date: string, days: number): string | null {
   const index = dates.indexOf(date);
-  return dates[index + days] ?? null;
+  return index >= 0 ? (dates[index + days] ?? null) : null;
+}
+
+async function getPreviousDate(date: string, availableDates?: string[]): Promise<string | null> {
+  const dates = availableDates ?? (await getAvailableDates());
+  return previousDateFrom(dates, date);
+}
+
+async function getDateDaysAgo(
+  date: string,
+  days: number,
+  availableDates?: string[],
+): Promise<string | null> {
+  const dates = availableDates ?? (await getAvailableDates());
+  return dateDaysAgoFrom(dates, date, days);
 }
 
 async function getRankMap(date: string, rankType: RankType) {
@@ -101,14 +113,16 @@ async function getRankMap(date: string, rankType: RankType) {
 export async function getRankings(
   rankType: RankType,
   date?: string,
+  availableDates?: string[],
 ): Promise<{ date: string; previousDate: string | null; items: RankEntry[] }> {
   await ensureDb();
-  const targetDate = date ?? (await getLatestDate());
+  const dates = availableDates ?? (await getAvailableDates());
+  const targetDate = date ?? dates[0];
   if (!targetDate) {
     return { date: "", previousDate: null, items: [] };
   }
 
-  const previousDate = await getPreviousDate(targetDate);
+  const previousDate = previousDateFrom(dates, targetDate);
   const previousMap = previousDate
     ? await getRankMap(previousDate, rankType)
     : new Map<number, number>();
@@ -166,8 +180,9 @@ async function countConsecutiveDaysUp(
   gameId: number,
   rankType: RankType,
   endDate: string,
+  availableDates?: string[],
 ): Promise<number> {
-  const dates = await getAvailableDates();
+  const dates = availableDates ?? (await getAvailableDates());
   const endIndex = dates.indexOf(endDate);
   if (endIndex === -1) return 0;
 
@@ -217,15 +232,17 @@ export async function getRisingGames(
   rankType: RankType,
   date?: string,
   limit = 20,
+  options?: { availableDates?: string[]; currentItems?: RankEntry[] },
 ): Promise<{ date: string; items: RisingGame[] }> {
   await ensureDb();
-  const targetDate = date ?? (await getLatestDate());
+  const dates = options?.availableDates ?? (await getAvailableDates());
+  const targetDate = date ?? dates[0];
   if (!targetDate) {
     return { date: "", items: [] };
   }
 
-  const previousDate = await getPreviousDate(targetDate);
-  const weekAgoDate = await getDateDaysAgo(targetDate, 6);
+  const previousDate = previousDateFrom(dates, targetDate);
+  const weekAgoDate = dateDaysAgoFrom(dates, targetDate, 6);
   const previousMap = previousDate
     ? await getRankMap(previousDate, rankType)
     : new Map<number, number>();
@@ -233,7 +250,9 @@ export async function getRisingGames(
     ? await getRankMap(weekAgoDate, rankType)
     : new Map<number, number>();
 
-  const { items: currentItems } = await getRankings(rankType, targetDate);
+  const currentItems =
+    options?.currentItems ??
+    (await getRankings(rankType, targetDate, dates)).items;
 
   const rising: RisingGame[] = currentItems
     .map((item) => {
@@ -267,6 +286,7 @@ export async function getRisingGames(
         item.gameId,
         rankType,
         targetDate,
+        dates,
       );
       return {
         ...item,
@@ -312,6 +332,58 @@ export async function getGameById(gameId: number) {
   await ensureDb();
   const [game] = await db.select().from(games).where(eq(games.id, gameId)).limit(1);
   return game ?? null;
+}
+
+export interface HomePageData {
+  latestDate: string | null;
+  previousDate: string | null;
+  totalGames: number;
+  newEntriesCount: number;
+  date: string;
+  bestsellerItems: RankEntry[];
+  risingItems: RisingGame[];
+}
+
+/** 首页聚合查询：共用日期与榜单，避免重复查库 */
+export async function getHomePageData(
+  rankType: RankType = "bestseller",
+): Promise<HomePageData> {
+  await ensureDb();
+  const dates = await getAvailableDates();
+  const latestDate = dates[0] ?? null;
+  const previousDate = latestDate ? previousDateFrom(dates, latestDate) : null;
+
+  if (!latestDate) {
+    return {
+      latestDate: null,
+      previousDate: null,
+      totalGames: 0,
+      newEntriesCount: 0,
+      date: "",
+      bestsellerItems: [],
+      risingItems: [],
+    };
+  }
+
+  const [[gameCountRow], rankingsResult] = await Promise.all([
+    db.select({ count: count() }).from(games),
+    getRankings(rankType, latestDate, dates),
+  ]);
+
+  const risingResult = await getRisingGames(rankType, latestDate, 10, {
+    availableDates: dates,
+    currentItems: rankingsResult.items,
+  });
+
+  return {
+    latestDate,
+    previousDate,
+    totalGames: gameCountRow?.count ?? 0,
+    newEntriesCount: rankingsResult.items.filter((item) => item.isNew).length,
+    date: rankingsResult.date,
+    bestsellerItems: rankingsResult.items,
+    risingItems: risingResult.items,
+  };
 }
 
 export async function getDashboardStats(

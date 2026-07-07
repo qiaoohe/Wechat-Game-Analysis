@@ -15,26 +15,25 @@ import { getDataSourceNote } from "@/lib/fetchers/rank-fetcher";
 import { uiText } from "@/lib/ui-text";
 import { cn, panelActionLinkClass, textLinkClass } from "@/lib/utils";
 import { createPageMetadata, SEO_PAGE_COPY } from "@/lib/site-seo";
-import {
-  getDashboardStats,
-  getNewEntries,
-  getRankings,
-  getRisingGames,
-} from "@/lib/services/rank-service";
+import { getHomePageData } from "@/lib/services/rank-service";
 
 export const metadata = createPageMetadata(SEO_PAGE_COPY.home);
 
 export default async function HomePage() {
-  const stats = await getDashboardStats("bestseller");
-  const { items: bestsellerItems, date } = await getRankings("bestseller");
-  const { items: risingItems } = await getRisingGames("bestseller", undefined, 10);
-  const newEntries = await getNewEntries("bestseller");
+  const {
+    latestDate,
+    totalGames,
+    newEntriesCount,
+    date,
+    bestsellerItems,
+    risingItems,
+  } = await getHomePageData("bestseller");
 
   return (
     <div>
       <PageHeader title="微信小游戏排行榜" description={getDataSourceNote()} />
 
-      {!stats.latestDate ? (
+      {!latestDate ? (
         <EmptyState
           title="暂无榜单数据"
           description="数据更新后将在此展示，请稍后再查看。"
@@ -44,17 +43,17 @@ export default async function HomePage() {
           <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
             <StatCard
               label="最新数据日期"
-              value={stats.latestDate}
+              value={latestDate}
               hint="指标每天更新"
             />
             <StatCard
               label="追踪游戏数"
-              value={stats.totalGames}
+              value={totalGames}
               hint="已入库的小游戏数量"
             />
             <StatCard
               label="今日新上榜"
-              value={newEntries.length}
+              value={newEntriesCount}
               hint={`${RANK_TYPE_LABELS.bestseller} · ${date}`}
             />
 

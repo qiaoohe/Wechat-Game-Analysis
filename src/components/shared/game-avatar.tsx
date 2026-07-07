@@ -43,7 +43,7 @@ export function GameAvatar({
         width={px}
         height={px}
         className="h-full w-full object-cover"
-        unoptimized
+        loading="lazy"
       />
     </div>
   );

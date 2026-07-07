@@ -36,6 +36,7 @@ export default async function RankingsPage({ searchParams }: RankingsPageProps) 
   const { date, previousDate, items } = await getRankings(
     rankType,
     selectedDate,
+    dates,
   );
 
   return (

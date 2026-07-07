@@ -1,29 +1,54 @@
 import type { NextConfig } from "next";
 import path from "path";
 
-/** 页面 HTML 禁止 CDN/浏览器缓存，静态资源不受影响 */
-const NO_STORE_PAGE_HEADERS = [
+/** 页面 ISR 缓存：数据日更，CDN 缓存 5 分钟，过期后后台刷新 */
+const PAGE_CACHE_HEADERS = [
   {
     key: "Cache-Control",
-    value: "private, no-cache, no-store, max-age=0, must-revalidate",
+    value: "public, s-maxage=300, stale-while-revalidate=86400",
   },
   {
     key: "CDN-Cache-Control",
-    value: "no-store",
+    value: "public, s-maxage=300, stale-while-revalidate=86400",
   },
   {
     key: "Vercel-CDN-Cache-Control",
-    value: "no-store",
+    value: "public, s-maxage=300, stale-while-revalidate=86400",
   },
 ];
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["better-sqlite3"],
   images: {
+    localPatterns: [
+      {
+        pathname: "/api/proxy/image",
+      },
+    ],
     remotePatterns: [
       {
         protocol: "https",
         hostname: "api.dicebear.com",
+      },
+      {
+        protocol: "https",
+        hostname: "mmbiz.qpic.cn",
+      },
+      {
+        protocol: "https",
+        hostname: "mmgame.qpic.cn",
+      },
+      {
+        protocol: "https",
+        hostname: "mmocgame.qpic.cn",
+      },
+      {
+        protocol: "https",
+        hostname: "wx.qlogo.cn",
+      },
+      {
+        protocol: "https",
+        hostname: "thirdwx.qlogo.cn",
       },
     ],
   },
@@ -35,7 +60,7 @@ const nextConfig: NextConfig = {
       {
         source:
           "/((?!_next/static|_next/image|favicon.ico|icon.svg|robots.txt|sitemap.xml|api/proxy).*)",
-        headers: NO_STORE_PAGE_HEADERS,
+        headers: PAGE_CACHE_HEADERS,
       },
     ];
   },

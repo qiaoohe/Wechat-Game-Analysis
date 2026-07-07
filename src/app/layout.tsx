@@ -28,9 +28,8 @@ export const viewport: Viewport = {
 
 export const metadata = createRootMetadata();
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-export const fetchCache = "force-no-store";
+/** 榜单日更，ISR 5 分钟；cron 更新后最多延迟 5 分钟可见 */
+export const revalidate = 300;
 
 export default function RootLayout({
   children,
