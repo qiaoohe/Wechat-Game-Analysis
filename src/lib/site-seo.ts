@@ -164,5 +164,14 @@ export function createRootMetadata(): Metadata {
         "max-snippet": -1,
       },
     },
+    /** 补充 /favicon.ico（Google 默认会抓）；与 app/icon.tsx 48×48 PNG 一致 */
+    icons: {
+      icon: [
+        { url: "/favicon.ico", sizes: "48x48", type: "image/x-icon" },
+        { url: "/icon", sizes: "48x48", type: "image/png" },
+      ],
+      shortcut: "/favicon.ico",
+      apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
+    },
   };
 }
