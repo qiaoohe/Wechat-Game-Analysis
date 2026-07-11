@@ -13,12 +13,14 @@ import {
   RankTableShell,
 } from "@/components/rankings/rank-table-shell";
 import { Card, CardContent } from "@/components/ui/card";
+import { RANK_TYPE_LABELS, type RankType } from "@/lib/constants";
 import type { RisingGame } from "@/lib/types";
 import { uiText } from "@/lib/ui-text";
 import { cn, textLinkClass } from "@/lib/utils";
 
 interface RisingTableProps {
   items: RisingGame[];
+  rankType: RankType;
 }
 
 /** 增速榜 · 桌面端表格（md+） */
@@ -92,12 +94,15 @@ export function RisingTableDesktop({ items }: { items: RisingGame[] }) {
   );
 }
 
-export function RisingTable({ items }: RisingTableProps) {
+export function RisingTable({ items, rankType }: RisingTableProps) {
   return (
     <>
       <Card className="overflow-hidden border-slate-200/80 md:hidden">
         <CardContent className="p-0">
-          <RisingMobileList items={items} />
+          <RisingMobileList
+            items={items}
+            rankTypeLabel={RANK_TYPE_LABELS[rankType]}
+          />
         </CardContent>
       </Card>
       <Card className="hidden overflow-hidden border-slate-200/80 md:block">

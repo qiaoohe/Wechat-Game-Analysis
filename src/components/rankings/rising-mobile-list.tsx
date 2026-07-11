@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { EllipsisText } from "@/components/shared/ellipsis-text";
 import { GameAvatar } from "@/components/shared/game-avatar";
+import { RankChangeBadge } from "@/components/rankings/rank-change-badge";
 import { RankNumber } from "@/components/rankings/rank-mobile-list";
 import type { RisingGame } from "@/lib/types";
 import { uiText } from "@/lib/ui-text";
@@ -9,10 +10,12 @@ import { cn } from "@/lib/utils";
 
 interface RisingMobileListProps {
   items: RisingGame[];
+  /** 如「畅销榜」，用于副标题区分增速排名与主榜排名 */
+  rankTypeLabel: string;
 }
 
 /** 增速榜 · 移动端卡片列表（布局对齐榜单页 RankMobileList） */
-export function RisingMobileList({ items }: RisingMobileListProps) {
+export function RisingMobileList({ items, rankTypeLabel }: RisingMobileListProps) {
   return (
     <ul className="divide-y divide-slate-100">
       {items.map((item, index) => (
@@ -33,17 +36,7 @@ export function RisingMobileList({ items }: RisingMobileListProps) {
                 {item.name}
               </EllipsisText>
               <p className={cn("mt-1 text-xs text-slate-500", uiText.label)}>
-                当前 #{item.currentRank}
-                {item.dailyChange > 0 ? (
-                  <>
-                    {" "}
-                    · 日升{" "}
-                    <span className={cn("tabular-nums", uiText.num)}>
-                      {item.dailyChange}
-                    </span>{" "}
-                    位
-                  </>
-                ) : null}
+                {rankTypeLabel} #{item.currentRank}
                 {item.consecutiveDaysUp > 0 ? (
                   <>
                     {" "}
@@ -56,14 +49,9 @@ export function RisingMobileList({ items }: RisingMobileListProps) {
                 ) : null}
               </p>
             </div>
-            <span
-              className={cn(
-                "shrink-0 rounded-lg bg-brand-soft px-2 py-1 text-xs font-semibold whitespace-nowrap text-brand-text tabular-nums",
-                uiText.num,
-              )}
-            >
-              {item.risingScore.toFixed(1)}
-            </span>
+            <div className="shrink-0">
+              <RankChangeBadge change={item.weeklyChange} compact />
+            </div>
           </Link>
         </li>
       ))}
