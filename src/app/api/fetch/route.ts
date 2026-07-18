@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { revalidateSitePages } from "@/lib/cache/revalidate-site";
 import {
   fetchAllRanks,
   getFetchConfigStatus,
@@ -22,8 +23,17 @@ async function runFetch(date?: string) {
     insights.ipTrends.count > 0;
   const success = result.success || insightOk;
 
+  let revalidated: string[] | null = null;
+  if (success) {
+    try {
+      revalidated = revalidateSitePages();
+    } catch {
+      revalidated = null;
+    }
+  }
+
   return NextResponse.json(
-    { ...result, insights, success },
+    { ...result, insights, success, revalidated },
     { status: success ? 200 : 502 },
   );
 }

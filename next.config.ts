@@ -1,19 +1,23 @@
 import type { NextConfig } from "next";
 import path from "path";
 
-/** 页面 ISR 缓存：数据日更，CDN 缓存 5 分钟，过期后后台刷新 */
+/**
+ * 页面 ISR / CDN：新鲜窗口 5 分钟。
+ * stale-while-revalidate 只留 60 秒，避免长时间先返回旧页再后台刷新
+ * （抓取成功后还会走 /api/revalidate 主动失效）。
+ */
 const PAGE_CACHE_HEADERS = [
   {
     key: "Cache-Control",
-    value: "public, s-maxage=300, stale-while-revalidate=86400",
+    value: "public, s-maxage=300, stale-while-revalidate=60",
   },
   {
     key: "CDN-Cache-Control",
-    value: "public, s-maxage=300, stale-while-revalidate=86400",
+    value: "public, s-maxage=300, stale-while-revalidate=60",
   },
   {
     key: "Vercel-CDN-Cache-Control",
-    value: "public, s-maxage=300, stale-while-revalidate=86400",
+    value: "public, s-maxage=300, stale-while-revalidate=60",
   },
 ];
 

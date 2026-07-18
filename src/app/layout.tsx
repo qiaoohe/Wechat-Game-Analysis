@@ -28,7 +28,7 @@ export const viewport: Viewport = {
 
 export const metadata = createRootMetadata();
 
-/** 榜单日更，ISR 5 分钟；cron 更新后最多延迟 5 分钟可见 */
+/** 榜单日更，ISR 5 分钟；抓取成功后会 on-demand revalidate */
 export const revalidate = 300;
 
 export default function RootLayout({
