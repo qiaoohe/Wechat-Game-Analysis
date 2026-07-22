@@ -33,14 +33,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               className="h-3.5 w-3.5 shrink-0 rounded-md bg-brand sm:h-4 sm:w-4"
               aria-hidden
             />
-            <span className="min-w-0">
-              <span className="block truncate text-sm font-semibold text-slate-900 sm:text-base">
-                {SITE_NAME_ZH}
-              </span>
-              <span className="hidden text-[11px] font-medium tracking-wide text-slate-400 sm:block">
-                {BRAND_NAME}
-              </span>
-            </span>
+            <p className="truncate text-sm font-semibold text-slate-900 sm:text-base">
+              {SITE_NAME_ZH}
+            </p>
           </Link>
 
           <nav className="hidden items-center gap-1 md:flex">
