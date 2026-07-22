@@ -14,7 +14,12 @@ import { RANK_TYPE_LABELS } from "@/lib/constants";
 import { getDataSourceNote } from "@/lib/fetchers/rank-fetcher";
 import { uiText } from "@/lib/ui-text";
 import { cn, panelActionLinkClass, textLinkClass } from "@/lib/utils";
-import { createPageMetadata, SEO_PAGE_COPY } from "@/lib/site-seo";
+import {
+  BRAND_NAME,
+  createPageMetadata,
+  SEO_PAGE_COPY,
+  SITE_NAME_ZH,
+} from "@/lib/site-seo";
 import { getHomePageData } from "@/lib/services/rank-service";
 
 export const metadata = createPageMetadata(SEO_PAGE_COPY.home);
@@ -31,7 +36,10 @@ export default async function HomePage() {
 
   return (
     <div>
-      <PageHeader title="微信小游戏排行榜" description={getDataSourceNote()} />
+      <PageHeader
+        title={`${SITE_NAME_ZH} - ${BRAND_NAME}`}
+        description={getDataSourceNote()}
+      />
 
       {!latestDate ? (
         <EmptyState

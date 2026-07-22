@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { UmamiAnalytics } from "@/components/analytics/umami-analytics";
 import { AppShell } from "@/components/layout/app-shell";
 import { RouteLoadingBar } from "@/components/layout/route-loading-bar";
+import { SiteJsonLd } from "@/components/seo/site-json-ld";
 import { createRootMetadata } from "@/lib/site-seo";
 
 import "./globals.css";
@@ -42,6 +43,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full">
+        <SiteJsonLd />
         <Suspense fallback={null}>
           <RouteLoadingBar />
         </Suspense>

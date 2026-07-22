@@ -3,6 +3,9 @@ import type { MetadataRoute } from "next";
 import { SEO_PAGE_COPY, SITE_URL } from "@/lib/site-seo";
 import { getRankings } from "@/lib/services/rank-service";
 
+/** sitemap 需及时反映新 URL / lastmod，避免长期返回陈旧快照 */
+export const revalidate = 0;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = Object.values(SEO_PAGE_COPY).map(
     (page) => ({
