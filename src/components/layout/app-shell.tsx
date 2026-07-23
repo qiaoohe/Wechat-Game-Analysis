@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { MobileNavMenu } from "@/components/layout/mobile-nav-menu";
-import { BRAND_NAME, SITE_NAME_ZH } from "@/lib/site-seo";
+import { SITE_NAME_ZH } from "@/lib/site-seo";
 import { cn, linkHoverClass } from "@/lib/utils";
 
 const navItems = [
@@ -64,19 +64,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8">{children}</main>
-
-      <footer className="border-t border-slate-200/80 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-6 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <p>
-            <span className="font-medium text-slate-700">{SITE_NAME_ZH}</span>
-            <span className="mx-1.5 text-slate-300">·</span>
-            <span className="font-medium text-slate-700">{BRAND_NAME}</span>
-          </p>
-          <p className="text-xs text-slate-400">
-            momorank.com · 微信小游戏榜单数据每日更新
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }
