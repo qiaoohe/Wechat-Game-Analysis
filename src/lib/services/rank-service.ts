@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, ilike, like } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, like, or } from "drizzle-orm";
 
 import type { RankType } from "@/lib/constants";
 import { usePostgres } from "@/lib/db/config";
@@ -576,14 +576,77 @@ export async function importRankSnapshot(payload: ImportPayload) {
   return { success: true, count: items.length };
 }
 
+type SearchGameRow = {
+  id: number;
+  appId: string | null;
+  name: string;
+  publisher: string | null;
+  category: string | null;
+  iconUrl: string | null;
+};
+
 export async function searchGames(query: string, limit = 10) {
   await ensureDb();
-  const pattern = `%${query}%`;
-  return db
-    .select()
+  const q = query.trim();
+  if (!q) return [];
+
+  const pattern = `%${q}%`;
+  const nameMatch = usePostgres()
+    ? ilike(games.name, pattern)
+    : like(games.name, pattern);
+  const publisherMatch = usePostgres()
+    ? ilike(games.publisher, pattern)
+    : like(games.publisher, pattern);
+  const appIdMatch = usePostgres()
+    ? ilike(games.appId, pattern)
+    : like(games.appId, pattern);
+
+  const sqlHits = (await db
+    .select({
+      id: games.id,
+      appId: games.appId,
+      name: games.name,
+      publisher: games.publisher,
+      category: games.category,
+      iconUrl: games.iconUrl,
+    })
     .from(games)
-    .where(usePostgres() ? ilike(games.name, pattern) : like(games.name, pattern))
-    .limit(limit);
+    .where(or(nameMatch, publisherMatch, appIdMatch))
+    .limit(limit)) as SearchGameRow[];
+
+  const { looksLikePinyinQuery, matchesPinyin } = await import(
+    "@/lib/pinyin-search"
+  );
+
+  if (!looksLikePinyinQuery(q) || sqlHits.length >= limit) {
+    return sqlHits;
+  }
+
+  // 拼音 / 首字母补充：如 wzry、tengxun
+  const allRows = (await db
+    .select({
+      id: games.id,
+      appId: games.appId,
+      name: games.name,
+      publisher: games.publisher,
+      category: games.category,
+      iconUrl: games.iconUrl,
+    })
+    .from(games)) as SearchGameRow[];
+
+  const seen = new Set(sqlHits.map((row) => row.id));
+  const pinyinHits: SearchGameRow[] = [];
+
+  for (const row of allRows) {
+    if (seen.has(row.id)) continue;
+    if (matchesPinyin(row.name, q) || matchesPinyin(row.publisher, q)) {
+      seen.add(row.id);
+      pinyinHits.push(row);
+      if (sqlHits.length + pinyinHits.length >= limit) break;
+    }
+  }
+
+  return [...sqlHits, ...pinyinHits].slice(0, limit);
 }
 
 export async function getGamesOnRank(date: string, rankType: RankType) {

@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { EllipsisText } from "@/components/shared/ellipsis-text";
 import { GameAvatar } from "@/components/shared/game-avatar";
+import { GamePublisherText } from "@/components/shared/game-publisher-text";
 import { RankChangeBadge } from "@/components/rankings/rank-change-badge";
 import { RankLabelBadges } from "@/components/rankings/rank-label-badges";
 import { RankMobileList } from "@/components/rankings/rank-mobile-list";
@@ -14,6 +15,7 @@ import {
   RankTableShell,
 } from "@/components/rankings/rank-table-shell";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatPublisher } from "@/lib/services/publisher-service";
 import type { RankEntry } from "@/lib/types";
 import { uiText } from "@/lib/ui-text";
 import { cn, textLinkClass } from "@/lib/utils";
@@ -60,6 +62,8 @@ export function RankTableDesktop({ items }: { items: RankEntry[] }) {
         {items.map((item) => {
           const description = item.category?.trim() || "—";
           const hasMpNewLabel = item.rankLabels.includes("新上榜");
+          const publisher = formatPublisher(item.publisher);
+          const hasLabels = item.rankLabels.length > 0;
 
           return (
             <RankTableRow key={item.gameId}>
@@ -81,7 +85,22 @@ export function RankTableDesktop({ items }: { items: RankEntry[] }) {
                     >
                       <EllipsisText>{item.name}</EllipsisText>
                     </Link>
-                    <RankLabelBadges labels={item.rankLabels} />
+                    {publisher || hasLabels ? (
+                      <div className="mt-0.5 flex min-w-0 items-center gap-1.5 overflow-hidden">
+                        {hasLabels ? (
+                          <RankLabelBadges
+                            labels={item.rankLabels}
+                            className="mt-0 shrink-0"
+                          />
+                        ) : null}
+                        {publisher ? (
+                          <GamePublisherText
+                            publisher={item.publisher}
+                            className="mt-0 min-w-0"
+                          />
+                        ) : null}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </RankTableCell>

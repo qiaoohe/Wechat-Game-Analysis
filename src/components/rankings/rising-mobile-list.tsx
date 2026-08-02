@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { EllipsisText } from "@/components/shared/ellipsis-text";
 import { GameAvatar } from "@/components/shared/game-avatar";
+import { GamePublisherText } from "@/components/shared/game-publisher-text";
 import { RankChangeBadge } from "@/components/rankings/rank-change-badge";
 import { RankNumber } from "@/components/rankings/rank-mobile-list";
 import type { RisingGame } from "@/lib/types";
@@ -35,6 +36,7 @@ export function RisingMobileList({ items, rankTypeLabel }: RisingMobileListProps
               <EllipsisText className="font-medium text-slate-900 transition-colors group-hover:text-brand">
                 {item.name}
               </EllipsisText>
+              <GamePublisherText publisher={item.publisher} />
               <p className={cn("mt-1 text-xs text-slate-500", uiText.label)}>
                 {rankTypeLabel} #{item.currentRank}
                 {item.consecutiveDaysUp > 0 ? (

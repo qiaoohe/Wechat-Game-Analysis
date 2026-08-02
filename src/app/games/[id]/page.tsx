@@ -14,9 +14,13 @@ import {
   RANK_TYPES,
   type RankType,
 } from "@/lib/constants";
-import { cn, mutedLinkClass } from "@/lib/utils";
+import { cn, mutedLinkClass, textLinkClass } from "@/lib/utils";
 import { uiText } from "@/lib/ui-text";
 import { createPageMetadata } from "@/lib/site-seo";
+import {
+  formatPublisher,
+  publisherPath,
+} from "@/lib/services/publisher-service";
 import {
   getGameById,
   getGameTrend,
@@ -61,9 +65,15 @@ export async function generateMetadata({
   }
 
   const summary = game.category?.trim();
-  const description = summary
-    ? `${game.name}：${summary}。查看该游戏在${RANK_TYPE_LABELS[rankType]}中的排名、变化趋势与历史数据。`
-    : `查看 ${game.name} 在微信小游戏${RANK_TYPE_LABELS[rankType]}中的排名、变化趋势与历史数据。`;
+  const publisher = formatPublisher(game.publisher);
+  const description = [
+    game.name,
+    publisher ? `开发商${publisher}` : null,
+    summary,
+    `查看该游戏在${RANK_TYPE_LABELS[rankType]}中的排名、变化趋势与历史数据。`,
+  ]
+    .filter(Boolean)
+    .join("。");
 
   return createPageMetadata({
     title: game.name,
@@ -96,6 +106,8 @@ export default async function GamePage({
   );
 
   const metaDescription = game.category?.trim() || "暂无简介";
+  const publisher = formatPublisher(game.publisher);
+  const companyHref = publisherPath(game.publisher);
 
   return (
     <div>
@@ -119,6 +131,19 @@ export default async function GamePage({
               <h1 className="text-xl font-semibold tracking-tight text-zinc-900 sm:text-2xl">
                 {game.name}
               </h1>
+              {publisher ? (
+                <p className="mt-1.5 text-sm text-zinc-600">
+                  <span className="text-zinc-400">开发商</span>
+                  <span className="mx-1.5 text-zinc-300">·</span>
+                  {companyHref ? (
+                    <Link href={companyHref} className={textLinkClass}>
+                      {publisher}
+                    </Link>
+                  ) : (
+                    <span className="font-medium text-zinc-800">{publisher}</span>
+                  )}
+                </p>
+              ) : null}
               <EllipsisText
                 lines={2}
                 className="mt-1.5 text-sm leading-6 text-zinc-500"
@@ -141,7 +166,7 @@ export default async function GamePage({
         </div>
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <div className="rounded-xl border border-slate-200/80 bg-white p-4 sm:p-5">
           <p className={cn("text-xs text-zinc-500 sm:text-sm", uiText.label)}>当前排名</p>
           <p className="mt-1.5 text-2xl font-semibold whitespace-nowrap text-zinc-900 sm:mt-2 sm:text-3xl">
@@ -158,7 +183,29 @@ export default async function GamePage({
               : "—"}
           </p>
         </div>
-        <div className="col-span-2 rounded-xl border border-slate-200/80 bg-white p-4 sm:col-span-1 sm:p-5">
+        <div className="rounded-xl border border-slate-200/80 bg-white p-4 sm:p-5">
+          <p className={cn("text-xs text-zinc-500 sm:text-sm", uiText.label)}>开发商</p>
+          {companyHref && publisher ? (
+            <Link
+              href={companyHref}
+              className={cn("mt-2 block text-sm", textLinkClass, uiText.line1)}
+              title={publisher}
+            >
+              {publisher}
+            </Link>
+          ) : (
+            <p
+              className={cn(
+                "mt-2 text-sm font-medium text-zinc-900",
+                uiText.line1,
+              )}
+              title={publisher ?? undefined}
+            >
+              {publisher || "暂未收录"}
+            </p>
+          )}
+        </div>
+        <div className="rounded-xl border border-slate-200/80 bg-white p-4 sm:p-5">
           <p className={cn("text-xs text-zinc-500 sm:text-sm", uiText.label)}>AppID</p>
           <p
             className={cn("mt-2 text-sm font-medium text-zinc-900", uiText.line1)}

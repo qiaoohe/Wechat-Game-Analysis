@@ -24,21 +24,26 @@ export function RankTablePanel({
 }: RankTablePanelProps) {
   return (
     <Card
-      className={cn("border-slate-200/80 bg-white", className)}
+      className={cn(
+        "flex h-full flex-col border-slate-200/80 bg-white",
+        className,
+      )}
     >
       <CardPanelHeader title={title} action={action} />
 
       {mobileCards ? (
         <>
-          <div className="overflow-hidden md:hidden">
+          <div className="min-h-0 flex-1 overflow-hidden md:hidden">
             <RankMobileList items={items} />
           </div>
-          <div className="hidden overflow-hidden md:block">
+          <div className="hidden min-h-0 flex-1 overflow-hidden md:block">
             <RankTableDesktop items={items} />
           </div>
         </>
       ) : (
-        <RankTable embedded items={items} />
+        <div className="min-h-0 flex-1">
+          <RankTable embedded items={items} />
+        </div>
       )}
     </Card>
   );

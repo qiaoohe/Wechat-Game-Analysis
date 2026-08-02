@@ -1,6 +1,10 @@
 import type { MetadataRoute } from "next";
 
 import { SEO_PAGE_COPY, SITE_URL } from "@/lib/site-seo";
+import {
+  listPublisherNames,
+  publisherPath,
+} from "@/lib/services/publisher-service";
 import { getRankings } from "@/lib/services/rank-service";
 
 /** sitemap 需及时反映新 URL / lastmod，避免长期返回陈旧快照 */
@@ -17,6 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   let gamePages: MetadataRoute.Sitemap = [];
+  let publisherPages: MetadataRoute.Sitemap = [];
 
   try {
     const { items } = await getRankings("bestseller");
@@ -26,9 +31,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: 0.6,
     }));
+
+    const publishers = await listPublisherNames();
+    publisherPages = publishers
+      .map((name) => publisherPath(name))
+      .filter((path): path is string => Boolean(path))
+      .map((path) => ({
+        url: `${SITE_URL}${path}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly" as const,
+        priority: 0.5,
+      }));
   } catch {
     // 数据库不可用时仍输出静态页面 sitemap
   }
 
-  return [...staticPages, ...gamePages];
+  return [...staticPages, ...gamePages, ...publisherPages];
 }

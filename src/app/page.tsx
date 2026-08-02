@@ -95,38 +95,53 @@ export default async function HomePage() {
                 </CardContent>
               ) : (
                 <>
-                  <div className="md:hidden">
+                  <div className="min-h-0 flex-1 md:hidden">
                     <HomeRisingList items={risingItems} />
                   </div>
-                  <CardContent className="hidden flex-1 flex-col px-5 pb-0 pt-0 md:flex sm:px-6">
-                    <div className="space-y-0 pt-2">
+                  <CardContent className="hidden min-h-0 flex-1 flex-col px-0 pb-0 pt-0 md:flex">
+                    <div className="flex h-full flex-col divide-y divide-slate-50">
                       {risingItems.map((item, index) => (
                         <div
                           key={item.gameId}
-                          className="flex items-center justify-between gap-4 border-b border-slate-100 py-4 last:border-0"
+                          className="flex flex-1 items-center justify-between gap-3 px-5 py-3.5 sm:px-6"
                         >
                           <div className="flex min-w-0 flex-1 items-center gap-3">
+                            <span
+                              className={cn(
+                                "inline-flex h-8 min-w-8 shrink-0 items-center justify-center rounded-lg px-1.5 text-sm font-semibold tabular-nums",
+                                index < 3
+                                  ? "bg-brand text-brand-foreground"
+                                  : "bg-slate-100 text-slate-700",
+                                uiText.num,
+                              )}
+                            >
+                              {index + 1}
+                            </span>
                             <GameAvatar
                               name={item.name}
                               iconUrl={item.iconUrl}
                               size="rank"
+                              className="!h-12 !w-12"
                             />
                             <div className="min-w-0 flex-1">
-                              <p className={cn("text-xs text-slate-400", uiText.num)}>
-                                #{index + 1}
-                              </p>
                               <Link
                                 href={`/games/${item.gameId}`}
-                                className={textLinkClass}
+                                className={cn("block leading-5", textLinkClass)}
                               >
                                 <EllipsisText>{item.name}</EllipsisText>
                               </Link>
-                              <p className={cn("mt-1 text-xs text-slate-500", uiText.label)}>
-                                当前 #{item.currentRank} · 日升 {item.dailyChange} 位
+                              <p
+                                className={cn(
+                                  "mt-0.5 text-xs leading-5 text-slate-500",
+                                  uiText.label,
+                                )}
+                              >
+                                当前 #{item.currentRank} · 日升 {item.dailyChange}{" "}
+                                位
                               </p>
                             </div>
                           </div>
-                          <span className="shrink-0 rounded-lg bg-brand-soft px-2 py-1 text-xs font-medium whitespace-nowrap text-brand-text">
+                          <span className="shrink-0 rounded-lg bg-brand-soft px-2 py-1 text-xs font-medium whitespace-nowrap text-brand-text tabular-nums">
                             {item.risingScore.toFixed(1)}
                           </span>
                         </div>

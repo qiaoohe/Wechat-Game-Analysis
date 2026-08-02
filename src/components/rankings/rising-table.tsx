@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { EllipsisText } from "@/components/shared/ellipsis-text";
 import { GameAvatar } from "@/components/shared/game-avatar";
+import { GamePublisherText } from "@/components/shared/game-publisher-text";
 import { RankChangeBadge } from "@/components/rankings/rank-change-badge";
 import { RisingMobileList } from "@/components/rankings/rising-mobile-list";
 import {
@@ -61,10 +62,11 @@ export function RisingTableDesktop({ items }: { items: RisingGame[] }) {
                   >
                     <EllipsisText>{item.name}</EllipsisText>
                   </Link>
+                  <GamePublisherText publisher={item.publisher} />
                   {item.category ? (
                     <EllipsisText
                       lines={1}
-                      className="mt-1 text-xs text-slate-400"
+                      className="mt-0.5 text-xs text-slate-400"
                     >
                       {item.category}
                     </EllipsisText>
