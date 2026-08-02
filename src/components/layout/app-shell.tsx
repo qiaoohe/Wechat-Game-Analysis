@@ -62,7 +62,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     "inline-flex items-center whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     active
                       ? "bg-brand-soft font-semibold text-brand ring-1 ring-inset ring-brand-muted"
-                      : cn("text-slate-600 hover:bg-brand-soft", linkHoverClass),
+                      : cn("text-slate-900 hover:bg-brand-soft", linkHoverClass),
                   )}
                 >
                   {item.label}
