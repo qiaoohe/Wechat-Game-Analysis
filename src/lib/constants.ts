@@ -60,8 +60,17 @@ export const ALLOWED_ICON_HOSTS = [
   "wx.qlogo.cn",
   "thirdwx.qlogo.cn",
   "res.wx.qq.com",
-  // 抖音小游戏图标
+  // 抖音小游戏图标（含 mgsdk-sign 等子域）
   "byteimg.com",
   "douyinpic.com",
   "bytedance.com",
+  "ibyteimg.com",
+  "bytegoofy.com",
+];
+
+/** 可走 Next/Image 直连的抖音 CDN（避免代理回源失败导致头像空白） */
+export const DOUYIN_DIRECT_ICON_HOSTS = [
+  "byteimg.com",
+  "douyinpic.com",
+  "ibyteimg.com",
 ];

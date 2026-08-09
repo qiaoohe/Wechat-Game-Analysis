@@ -63,6 +63,22 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "thirdwx.qlogo.cn",
       },
+      // 抖音小游戏图标直连（p*-mgsdk-sign.byteimg.com 等）
+      {
+        protocol: "https",
+        hostname: "**.byteimg.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "**.douyinpic.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "**.ibyteimg.com",
+        pathname: "/**",
+      },
     ],
   },
   turbopack: {

@@ -422,7 +422,7 @@ export async function importDouyinRankSnapshot(payload: {
 
     if (gameId == null) {
       const [existing] = await db
-        .select({ id: games.id })
+        .select({ id: games.id, iconUrl: games.iconUrl })
         .from(games)
         .where(eq(games.appId, appId))
         .limit(1);
@@ -435,7 +435,8 @@ export async function importDouyinRankSnapshot(payload: {
             name: item.name,
             publisher: item.publisher ?? null,
             category: item.category ?? null,
-            iconUrl: item.iconUrl ?? null,
+            // 新图标解析失败时保留旧头像，避免被写成空
+            iconUrl: item.iconUrl ?? existing.iconUrl ?? null,
           })
           .where(eq(games.id, existing.id));
         resolvedId = existing.id;

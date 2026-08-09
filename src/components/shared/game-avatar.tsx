@@ -1,9 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
-import { resolveGameIconUrl } from "@/lib/utils/icon";
+import {
+  getGameIconFallback,
+  isDouyinDirectIconUrl,
+  resolveGameIconUrl,
+} from "@/lib/utils/icon";
 
 interface GameAvatarProps {
   name: string;
@@ -26,8 +31,19 @@ export function GameAvatar({
   size = "md",
   className,
 }: GameAvatarProps) {
-  const src = resolveGameIconUrl(iconUrl, name);
+  const resolved = resolveGameIconUrl(iconUrl, name);
+  const fallback = getGameIconFallback(name);
+  const [src, setSrc] = useState(resolved);
   const { box, px } = sizeMap[size];
+  // 抖音签名 CDN 对服务端/Image Optimizer 回源不稳定，浏览器直连更可靠
+  const unoptimized =
+    Boolean(iconUrl && isDouyinDirectIconUrl(iconUrl)) ||
+    src === fallback ||
+    src.startsWith("https://api.dicebear.com/");
+
+  useEffect(() => {
+    setSrc(resolved);
+  }, [resolved]);
 
   return (
     <div
@@ -44,6 +60,10 @@ export function GameAvatar({
         height={px}
         className="h-full w-full object-cover"
         loading="lazy"
+        unoptimized={unoptimized}
+        onError={() => {
+          if (src !== fallback) setSrc(fallback);
+        }}
       />
     </div>
   );

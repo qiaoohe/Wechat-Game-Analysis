@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 
-import { isAllowedIconUrl } from "@/lib/utils/icon";
+import { isAllowedIconUrl, isDouyinDirectIconUrl } from "@/lib/utils/icon";
+
+function refererForIconUrl(url: string) {
+  if (isDouyinDirectIconUrl(url)) {
+    return "https://developer.open-douyin.com/";
+  }
+  return "https://servicewechat.com/";
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -11,13 +18,19 @@ export async function GET(request: Request) {
   }
 
   if (!isAllowedIconUrl(url)) {
-    return NextResponse.json({ error: "不允许的图片域名" }, { status: 403 });
+    return NextResponse.json(
+      { error: "不允许的图片域名" },
+      {
+        status: 403,
+        headers: { "Cache-Control": "no-store" },
+      },
+    );
   }
 
   try {
     const response = await fetch(url, {
       headers: {
-        Referer: "https://servicewechat.com/",
+        Referer: refererForIconUrl(url),
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
       },
@@ -26,7 +39,13 @@ export async function GET(request: Request) {
     });
 
     if (!response.ok) {
-      return NextResponse.json({ error: "图片获取失败" }, { status: 502 });
+      return NextResponse.json(
+        { error: "图片获取失败" },
+        {
+          status: 502,
+          headers: { "Cache-Control": "no-store" },
+        },
+      );
     }
 
     const contentType = response.headers.get("content-type") ?? "image/png";
@@ -39,6 +58,12 @@ export async function GET(request: Request) {
       },
     });
   } catch {
-    return NextResponse.json({ error: "图片代理失败" }, { status: 500 });
+    return NextResponse.json(
+      { error: "图片代理失败" },
+      {
+        status: 500,
+        headers: { "Cache-Control": "no-store" },
+      },
+    );
   }
 }
