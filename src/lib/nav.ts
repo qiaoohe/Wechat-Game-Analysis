@@ -37,7 +37,7 @@ export const DOUYIN_NAV_ITEMS: readonly NavItem[] = [
   {
     href: "/douyin/rankings",
     label: "榜单",
-    description: "抖音小游戏热门榜 · 畅销榜 · 新游榜",
+    description: "热门榜 · 畅销榜 · 新游榜 · 发行人热度榜",
   },
   {
     href: "/douyin/rising",

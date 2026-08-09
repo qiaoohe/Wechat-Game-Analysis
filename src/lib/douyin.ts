@@ -6,10 +6,12 @@ export const PLATFORM_DOUYIN = "douyin" as const;
 export const DOUYIN_APP_ID_PREFIX = "dy:" as const;
 export const DOUYIN_RANK_TYPE_PREFIX = "dy:" as const;
 
+/** 与工作台「游戏排行榜」四列一致 */
 export const DOUYIN_RANK_TYPES = [
   "popular",
   "bestseller",
   "new_game",
+  "publisher_heat",
 ] as const;
 
 export type DouyinRankType = (typeof DOUYIN_RANK_TYPES)[number];
@@ -18,24 +20,28 @@ export const DOUYIN_RANK_TYPE_LABELS: Record<DouyinRankType, string> = {
   popular: "热门榜",
   bestseller: "畅销榜",
   new_game: "新游榜",
+  publisher_heat: "发行人热度榜",
 };
 
+/** 文案对齐工作台 titleTips */
 export const DOUYIN_RANK_TYPE_DESCRIPTIONS: Record<DouyinRankType, string> = {
-  popular: "按用户活跃度与上线时间等维度综合计算（每天更新）",
-  bestseller: "按游戏内付费等指标综合计算（每天更新）",
-  new_game: "面向新上线游戏的综合表现排行（每天更新）",
+  popular: "依据小游戏访问用户量综合计算（每天更新）",
+  bestseller: "依据小游戏广告消耗与付费情况综合计算（每天更新）",
+  new_game: "依据近期新上线的小游戏访问用户量综合计算（每天更新）",
+  publisher_heat: "依据小游戏近 1 周发行人场景的营收能力计算（每天更新）",
 };
 
-/** 工作台 GetWorkbenchGameRankList.rankType */
+/** 工作台 GetWorkbenchGameRankList.rankType：HotGame=1 / BestSeller=2 / NewGame=3 / Pop=4 */
 export const DOUYIN_CONSOLE_RANK_TYPE_CODES: Record<DouyinRankType, number> = {
-  popular: 1, // HotGame 热门榜
-  bestseller: 2, // BestSeller 畅销榜
-  new_game: 3, // NewGame 新游榜
+  popular: 1,
+  bestseller: 2,
+  new_game: 3,
+  publisher_heat: 4,
 };
 
 export const DOUYIN_PAGE_DESCRIPTIONS = {
   rankings:
-    "按用户活跃度、付费与上线时间等维度综合计算（每天更新）",
+    "依据访问用户量、广告与付费、新游表现及发行人场景营收等维度综合计算（每天更新）",
   rising: "按日环比、7 日变化与连续上升天数等指标综合计算（每天更新）",
 } as const;
 

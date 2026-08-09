@@ -36,7 +36,7 @@ export const SITE_DESCRIPTION =
   `${BRAND_NAME}（${SITE_NAME_ZH}）提供微信小游戏畅销榜、人气榜、畅玩榜每日更新，以及排名趋势、增速监测、热搜词与 IP 热度分析，数据与微信官方口径一致。`;
 
 export const DOUYIN_SITE_DESCRIPTION =
-  `${BRAND_NAME}（${DOUYIN_SITE_NAME_ZH}）提供抖音小游戏热门榜、畅销榜、新游榜每日更新，查询完整排名与历史变化趋势。`;
+  `${BRAND_NAME}（${DOUYIN_SITE_NAME_ZH}）提供抖音小游戏热门榜、畅销榜、新游榜、发行人热度榜每日更新，查询完整排名与历史变化趋势。`;
 
 export const SEO_PAGE_COPY = {
   home: {
@@ -71,7 +71,7 @@ export const SEO_PAGE_COPY = {
   },
   douyinRankings: {
     title: DOUYIN_SITE_NAME_ZH,
-    description: `${DOUYIN_PAGE_DESCRIPTIONS.rankings} 在 ${BRAND_NAME} 查询抖音小游戏热门榜、畅销榜、新游榜完整排名与历史数据。`,
+    description: `${DOUYIN_PAGE_DESCRIPTIONS.rankings} 在 ${BRAND_NAME} 查询抖音小游戏热门榜、畅销榜、新游榜、发行人热度榜完整排名与历史数据。`,
     path: DOUYIN_RANKINGS_PATH,
   },
   douyinRising: {
