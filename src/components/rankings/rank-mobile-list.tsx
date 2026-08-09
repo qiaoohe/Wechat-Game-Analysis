@@ -26,10 +26,17 @@ export function RankNumber({ rank }: { rank: number }) {
 
 interface RankMobileListProps {
   items: RankEntry[];
+  /** 游戏详情路径前缀，默认微信 /games */
+  gameHrefPrefix?: string;
 }
 
 /** 榜单 · 移动端卡片列表 */
-export function RankMobileList({ items }: RankMobileListProps) {
+export function RankMobileList({
+  items,
+  gameHrefPrefix = "/games",
+}: RankMobileListProps) {
+  const prefix = gameHrefPrefix.replace(/\/$/, "");
+
   return (
     <ul className="divide-y divide-slate-100">
       {items.map((item) => {
@@ -40,7 +47,7 @@ export function RankMobileList({ items }: RankMobileListProps) {
         return (
           <li key={item.gameId}>
             <Link
-              href={`/games/${item.gameId}`}
+              href={`${prefix}/${item.gameId}`}
               className="group flex items-center gap-3 px-4 py-3.5 active:bg-slate-50"
             >
               <RankNumber rank={item.rank} />

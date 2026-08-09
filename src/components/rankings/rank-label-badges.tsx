@@ -11,7 +11,8 @@ const rankLabelBadgeClass =
   "inline-flex shrink-0 items-center rounded-md bg-brand-soft px-2 py-0.5 text-[11px] font-medium whitespace-nowrap text-brand-text ring-1 ring-inset ring-brand-muted";
 
 export function RankLabelBadges({ labels, className }: RankLabelBadgesProps) {
-  if (labels.length === 0) return null;
+  const uniqueLabels = [...new Set(labels.map((label) => label.trim()).filter(Boolean))];
+  if (uniqueLabels.length === 0) return null;
 
   return (
     <div
@@ -21,9 +22,9 @@ export function RankLabelBadges({ labels, className }: RankLabelBadgesProps) {
         className,
       )}
     >
-      {labels.map((label) => (
+      {uniqueLabels.map((label, index) => (
         <span
-          key={label}
+          key={`${label}-${index}`}
           className={label === "新上榜" ? newRankBadgeClass : rankLabelBadgeClass}
           title={label}
         >

@@ -13,16 +13,23 @@ interface RisingMobileListProps {
   items: RisingGame[];
   /** 如「畅销榜」，用于副标题区分增速排名与主榜排名 */
   rankTypeLabel: string;
+  gameHrefPrefix?: string;
 }
 
 /** 增速榜 · 移动端卡片列表（布局对齐榜单页 RankMobileList） */
-export function RisingMobileList({ items, rankTypeLabel }: RisingMobileListProps) {
+export function RisingMobileList({
+  items,
+  rankTypeLabel,
+  gameHrefPrefix = "/games",
+}: RisingMobileListProps) {
+  const prefix = gameHrefPrefix.replace(/\/$/, "");
+
   return (
     <ul className="divide-y divide-slate-100">
       {items.map((item, index) => (
         <li key={item.gameId}>
           <Link
-            href={`/games/${item.gameId}`}
+            href={`${prefix}/${item.gameId}`}
             className="group flex items-center gap-3 px-4 py-3.5 active:bg-slate-50"
           >
             <RankNumber rank={index + 1} />

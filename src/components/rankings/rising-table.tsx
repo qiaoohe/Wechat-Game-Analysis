@@ -14,18 +14,27 @@ import {
   RankTableShell,
 } from "@/components/rankings/rank-table-shell";
 import { Card, CardContent } from "@/components/ui/card";
-import { RANK_TYPE_LABELS, type RankType } from "@/lib/constants";
 import type { RisingGame } from "@/lib/types";
 import { uiText } from "@/lib/ui-text";
 import { cn, textLinkClass } from "@/lib/utils";
 
 interface RisingTableProps {
   items: RisingGame[];
-  rankType: RankType;
+  rankTypeLabel: string;
+  /** 游戏详情路径前缀，默认微信 /games */
+  gameHrefPrefix?: string;
 }
 
 /** 增速榜 · 桌面端表格（md+） */
-export function RisingTableDesktop({ items }: { items: RisingGame[] }) {
+export function RisingTableDesktop({
+  items,
+  gameHrefPrefix = "/games",
+}: {
+  items: RisingGame[];
+  gameHrefPrefix?: string;
+}) {
+  const prefix = gameHrefPrefix.replace(/\/$/, "");
+
   return (
     <RankTableShell>
       <colgroup>
@@ -57,7 +66,7 @@ export function RisingTableDesktop({ items }: { items: RisingGame[] }) {
                 />
                 <div className="min-w-0 flex-1">
                   <Link
-                    href={`/games/${item.gameId}`}
+                    href={`${prefix}/${item.gameId}`}
                     className={textLinkClass}
                   >
                     <EllipsisText>{item.name}</EllipsisText>
@@ -96,20 +105,28 @@ export function RisingTableDesktop({ items }: { items: RisingGame[] }) {
   );
 }
 
-export function RisingTable({ items, rankType }: RisingTableProps) {
+export function RisingTable({
+  items,
+  rankTypeLabel,
+  gameHrefPrefix = "/games",
+}: RisingTableProps) {
   return (
     <>
       <Card className="overflow-hidden border-slate-200/80 md:hidden">
         <CardContent className="p-0">
           <RisingMobileList
             items={items}
-            rankTypeLabel={RANK_TYPE_LABELS[rankType]}
+            rankTypeLabel={rankTypeLabel}
+            gameHrefPrefix={gameHrefPrefix}
           />
         </CardContent>
       </Card>
       <Card className="hidden overflow-hidden border-slate-200/80 md:block">
         <CardContent className="p-0">
-          <RisingTableDesktop items={items} />
+          <RisingTableDesktop
+            items={items}
+            gameHrefPrefix={gameHrefPrefix}
+          />
         </CardContent>
       </Card>
     </>

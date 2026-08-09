@@ -60,4 +60,8 @@ export const ALLOWED_ICON_HOSTS = [
   "wx.qlogo.cn",
   "thirdwx.qlogo.cn",
   "res.wx.qq.com",
+  // 抖音小游戏图标
+  "byteimg.com",
+  "douyinpic.com",
+  "bytedance.com",
 ];

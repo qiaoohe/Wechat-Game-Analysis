@@ -2,7 +2,7 @@
 
 import { Search, X } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   useEffect,
   useEffectEvent,
@@ -14,6 +14,8 @@ import {
 } from "react";
 
 import { GameAvatar } from "@/components/shared/game-avatar";
+import { DOUYIN_GAMES_PATH } from "@/lib/douyin";
+import { getSitePlatform } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
 interface SearchItem {
@@ -27,6 +29,15 @@ interface SearchItem {
 
 export function GameSearch({ className }: { className?: string }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const platform = getSitePlatform(pathname);
+  const gameHrefPrefix = platform === "douyin" ? DOUYIN_GAMES_PATH : "/games";
+  const placeholder =
+    platform === "douyin" ? "搜索抖音小游戏" : "搜索小游戏/公司";
+  const emptyHint =
+    platform === "douyin" ? "未找到相关抖音小游戏" : "未找到相关小游戏/公司";
+  const fallbackMeta = platform === "douyin" ? "抖音小游戏" : "微信小游戏";
+
   const listId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -49,7 +60,7 @@ export function GameSearch({ className }: { className?: string }) {
     setLoading(true);
     try {
       const response = await fetch(
-        `/api/games/search?q=${encodeURIComponent(q)}&limit=8`,
+        `/api/games/search?q=${encodeURIComponent(q)}&limit=8&platform=${platform}`,
       );
       if (!response.ok) {
         setItems([]);
@@ -78,7 +89,15 @@ export function GameSearch({ className }: { className?: string }) {
       void runSearch(q);
     }, 220);
     return () => window.clearTimeout(timer);
-  }, [query]);
+  }, [query, platform]);
+
+  // 切换平台时清空结果，避免串台
+  useEffect(() => {
+    setQuery("");
+    setItems([]);
+    setOpen(false);
+    setActiveIndex(-1);
+  }, [platform]);
 
   useEffect(() => {
     function onPointerDown(event: MouseEvent) {
@@ -95,7 +114,7 @@ export function GameSearch({ className }: { className?: string }) {
     setQuery("");
     setItems([]);
     startTransition(() => {
-      router.push(`/games/${id}`);
+      router.push(`${gameHrefPrefix}/${id}`);
     });
   }
 
@@ -130,7 +149,7 @@ export function GameSearch({ className }: { className?: string }) {
   return (
     <div ref={rootRef} className={cn("relative w-full max-w-xs", className)}>
       <label className="sr-only" htmlFor={`${listId}-input`}>
-        搜索小游戏/公司
+        {placeholder}
       </label>
       <div className="relative">
         <Search
@@ -150,7 +169,7 @@ export function GameSearch({ className }: { className?: string }) {
           }
           autoComplete="off"
           spellCheck={false}
-          placeholder="搜索小游戏/公司"
+          placeholder={placeholder}
           value={query}
           onChange={(event) => {
             setQuery(event.target.value);
@@ -185,7 +204,7 @@ export function GameSearch({ className }: { className?: string }) {
           {loading && items.length === 0 ? (
             <p className="px-3 py-3 text-sm text-slate-500">搜索中…</p>
           ) : items.length === 0 ? (
-            <p className="px-3 py-3 text-sm text-slate-500">未找到相关小游戏/公司</p>
+            <p className="px-3 py-3 text-sm text-slate-500">{emptyHint}</p>
           ) : (
             <ul className="max-h-[min(24rem,70vh)] overflow-y-auto py-1">
               {items.map((item, index) => {
@@ -194,7 +213,7 @@ export function GameSearch({ className }: { className?: string }) {
                   <li key={item.id} role="option" aria-selected={active}>
                     <Link
                       id={`${listId}-option-${index}`}
-                      href={`/games/${item.id}`}
+                      href={`${gameHrefPrefix}/${item.id}`}
                       className={cn(
                         "flex items-center gap-3 px-3 py-2.5 transition-colors",
                         active ? "bg-brand-soft" : "hover:bg-slate-50",
@@ -217,7 +236,7 @@ export function GameSearch({ className }: { className?: string }) {
                         <p className="mt-0.5 truncate text-xs text-slate-500">
                           {[item.publisher, item.category]
                             .filter(Boolean)
-                            .join(" · ") || "微信小游戏"}
+                            .join(" · ") || fallbackMeta}
                         </p>
                       </div>
                     </Link>

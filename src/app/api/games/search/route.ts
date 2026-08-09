@@ -1,11 +1,19 @@
 import { NextResponse } from "next/server";
 
-import { searchGames } from "@/lib/services/rank-service";
+import {
+  searchGames,
+  type SearchPlatform,
+} from "@/lib/services/rank-service";
 import { PUBLISHER_UNAVAILABLE } from "@/lib/services/publisher-service";
+
+function resolvePlatform(value: string | null): SearchPlatform {
+  return value === "douyin" ? "douyin" : "wechat";
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim() ?? "";
+  const platform = resolvePlatform(searchParams.get("platform"));
   const limitRaw = Number(searchParams.get("limit") ?? "8");
   const limit =
     Number.isFinite(limitRaw) && limitRaw > 0
@@ -13,10 +21,10 @@ export async function GET(request: Request) {
       : 8;
 
   if (q.length < 1) {
-    return NextResponse.json({ query: q, items: [] });
+    return NextResponse.json({ query: q, platform, items: [] });
   }
 
-  const rows = await searchGames(q, limit);
+  const rows = await searchGames(q, limit, platform);
   const items = rows.map(
     (row: {
       id: number;
@@ -38,5 +46,5 @@ export async function GET(request: Request) {
     }),
   );
 
-  return NextResponse.json({ query: q, items });
+  return NextResponse.json({ query: q, platform, items });
 }

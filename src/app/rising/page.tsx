@@ -57,7 +57,10 @@ export default async function RisingPage({ searchParams }: RisingPageProps) {
               `共 ${items.length} 款上升趋势游戏`,
             ]}
           />
-          <RisingTable items={items} rankType={rankType} />
+          <RisingTable
+            items={items}
+            rankTypeLabel={RANK_TYPE_LABELS[rankType]}
+          />
         </>
       )}
     </div>

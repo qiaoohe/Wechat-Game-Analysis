@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 
 import { PAGE_DESCRIPTIONS } from "@/lib/constants";
+import {
+  DOUYIN_PAGE_DESCRIPTIONS,
+  DOUYIN_RANKINGS_PATH,
+  DOUYIN_RISING_PATH,
+} from "@/lib/douyin";
 
 /** 对外英文品牌名（搜索品牌词用） */
 export const BRAND_NAME = "MomoRank";
@@ -14,6 +19,11 @@ export const SITE_NAME_ZH = "微信小游戏排行榜";
  */
 export const SITE_NAME = `${SITE_NAME_ZH} - ${BRAND_NAME}`;
 
+/** 抖音栏目中文名（独立 SEO，不改写微信主品牌） */
+export const DOUYIN_SITE_NAME_ZH = "抖音小游戏排行榜";
+
+export const DOUYIN_SITE_NAME = `${DOUYIN_SITE_NAME_ZH} - ${BRAND_NAME}`;
+
 /** 线上域名（Vercel 当前将 momorank.com 308 到 www.momorank.com） */
 export const SITE_DOMAIN = "www.momorank.com";
 
@@ -24,6 +34,9 @@ export const SITE_URL =
 /** 首页与默认 meta description */
 export const SITE_DESCRIPTION =
   `${BRAND_NAME}（${SITE_NAME_ZH}）提供微信小游戏畅销榜、人气榜、畅玩榜每日更新，以及排名趋势、增速监测、热搜词与 IP 热度分析，数据与微信官方口径一致。`;
+
+export const DOUYIN_SITE_DESCRIPTION =
+  `${BRAND_NAME}（${DOUYIN_SITE_NAME_ZH}）提供抖音小游戏热门榜、畅销榜、新游榜每日更新，查询完整排名与历史变化趋势。`;
 
 export const SEO_PAGE_COPY = {
   home: {
@@ -56,6 +69,16 @@ export const SEO_PAGE_COPY = {
     description: `${PAGE_DESCRIPTIONS.ipTrends} 在 ${BRAND_NAME} 追踪微信小游戏合作 IP 的热度变化与行业趋势。`,
     path: "/insights/ip-trends",
   },
+  douyinRankings: {
+    title: DOUYIN_SITE_NAME_ZH,
+    description: `${DOUYIN_PAGE_DESCRIPTIONS.rankings} 在 ${BRAND_NAME} 查询抖音小游戏热门榜、畅销榜、新游榜完整排名与历史数据。`,
+    path: DOUYIN_RANKINGS_PATH,
+  },
+  douyinRising: {
+    title: "增速榜",
+    description: `${DOUYIN_PAGE_DESCRIPTIONS.rising} 在 ${BRAND_NAME} 发现抖音小游戏中排名快速上升的热门游戏。`,
+    path: DOUYIN_RISING_PATH,
+  },
 } as const;
 
 const KEYWORDS = [
@@ -68,6 +91,18 @@ const KEYWORDS = [
   "人气榜",
   "畅玩榜",
   "微信游戏榜单",
+];
+
+const DOUYIN_KEYWORDS = [
+  BRAND_NAME,
+  "momorank",
+  DOUYIN_SITE_NAME_ZH,
+  "抖音小游戏",
+  "抖音小游戏排行榜",
+  "抖音小游戏热门榜",
+  "抖音小游戏畅销榜",
+  "抖音小游戏新游榜",
+  "抖音游戏榜单",
 ];
 
 interface CreatePageMetadataOptions {
@@ -120,6 +155,58 @@ export function createPageMetadata({
       locale: "zh_CN",
       url: canonical,
       siteName: SITE_NAME,
+      title: documentTitle,
+      description,
+    },
+    twitter: {
+      card: "summary",
+      title: documentTitle,
+      description,
+    },
+  };
+}
+
+interface CreateDouyinPageMetadataOptions {
+  title?: string;
+  description: string;
+  path?: string;
+  noIndex?: boolean;
+  keywords?: string[];
+}
+
+/**
+ * 抖音栏目专用 metadata：使用 absolute title，
+ * 避免根 layout 的「微信小游戏排行榜」title.template 污染。
+ */
+export function createDouyinPageMetadata({
+  title,
+  description,
+  path = DOUYIN_RANKINGS_PATH,
+  noIndex = false,
+  keywords = DOUYIN_KEYWORDS,
+}: CreateDouyinPageMetadataOptions): Metadata {
+  const canonical = buildCanonicalUrl(path);
+  const isHub =
+    !title || title === DOUYIN_SITE_NAME || title === DOUYIN_SITE_NAME_ZH;
+  const documentTitle = isHub
+    ? DOUYIN_SITE_NAME
+    : `${title} | ${DOUYIN_SITE_NAME}`;
+
+  return {
+    title: { absolute: documentTitle },
+    description,
+    keywords,
+    alternates: {
+      canonical,
+    },
+    robots: noIndex
+      ? { index: false, follow: false }
+      : { index: true, follow: true },
+    openGraph: {
+      type: "website",
+      locale: "zh_CN",
+      url: canonical,
+      siteName: DOUYIN_SITE_NAME,
       title: documentTitle,
       description,
     },

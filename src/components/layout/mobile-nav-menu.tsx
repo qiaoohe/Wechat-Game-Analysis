@@ -6,26 +6,24 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { PlatformSwitcher } from "@/components/layout/platform-switcher";
+import {
+  getNavItems,
+  getSitePlatform,
+  isNavActive,
+} from "@/lib/nav";
+import { DOUYIN_SITE_NAME_ZH, SITE_NAME_ZH } from "@/lib/site-seo";
 import { cn } from "@/lib/utils";
 
 const ANIMATION_MS = 300;
 
-const navItems = [
-  { href: "/", label: "概览", description: "数据概览与畅销榜 Top 10" },
-  { href: "/rankings", label: "榜单", description: "畅销榜 · 人气榜 · 畅玩榜" },
-  { href: "/rising", label: "增速", description: "排名快速上升的游戏" },
-  { href: "/insights/hot-words", label: "热搜词", description: "用户搜索热词趋势" },
-  { href: "/insights/hot-search", label: "热搜访问", description: "热搜词关联游戏访问" },
-  { href: "/insights/ip-trends", label: "IP 热度", description: "合作 IP 热度趋势" },
-];
-
-function isNavActive(pathname: string, href: string) {
-  if (href === "/") return pathname === "/";
-  return pathname.startsWith(href);
-}
-
 export function MobileNavMenu() {
   const pathname = usePathname();
+  const platform = getSitePlatform(pathname);
+  const navItems = getNavItems(platform);
+  const siteNameZh =
+    platform === "douyin" ? DOUYIN_SITE_NAME_ZH : SITE_NAME_ZH;
+
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -78,7 +76,9 @@ export function MobileNavMenu() {
               tabIndex={active ? 0 : -1}
               className={cn(
                 "mobile-nav-backdrop absolute inset-0 bg-slate-900/45",
-                active ? "mobile-nav-backdrop-open" : "mobile-nav-backdrop-closed",
+                active
+                  ? "mobile-nav-backdrop-open"
+                  : "mobile-nav-backdrop-closed",
               )}
               onClick={close}
             />
@@ -104,9 +104,20 @@ export function MobileNavMenu() {
               </div>
 
               <div className="flex-1 overflow-y-auto overscroll-contain p-3">
+                <div className="mb-3 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-3">
+                  <p className="mb-2 text-xs font-medium text-slate-500">
+                    当前平台 · {siteNameZh}
+                  </p>
+                  <PlatformSwitcher
+                    platform={platform}
+                    className="w-full [&_a]:flex-1"
+                    onNavigate={close}
+                  />
+                </div>
+
                 <ul className="space-y-1">
                   {navItems.map((item) => {
-                    const isActive = isNavActive(pathname, item.href);
+                    const itemActive = isNavActive(pathname, item.href);
 
                     return (
                       <li key={item.href}>
@@ -115,7 +126,7 @@ export function MobileNavMenu() {
                           onClick={close}
                           className={cn(
                             "group block rounded-xl px-3 py-3 transition-colors active:bg-slate-50",
-                            isActive
+                            itemActive
                               ? "bg-brand-soft ring-1 ring-inset ring-brand-muted"
                               : "hover:bg-slate-50",
                           )}
@@ -123,7 +134,7 @@ export function MobileNavMenu() {
                           <p
                             className={cn(
                               "text-sm font-medium transition-colors",
-                              isActive
+                              itemActive
                                 ? "font-semibold text-brand"
                                 : "text-slate-900 group-hover:text-brand",
                             )}

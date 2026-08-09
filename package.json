@@ -9,6 +9,7 @@
     "lint": "eslint",
     "db:seed": "tsx --env-file=.env.local scripts/seed.ts",
     "fetch": "tsx --env-file=.env.local scripts/fetch-ranks.ts",
+    "fetch:douyin": "tsx --env-file=.env.local scripts/fetch-douyin-ranks.ts",
     "enrich:publishers": "tsx --env-file=.env.local scripts/enrich-publishers.ts",
     "revalidate": "tsx --env-file=.env.local scripts/revalidate-site.ts"
   },

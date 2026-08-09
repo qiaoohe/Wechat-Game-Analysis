@@ -1,6 +1,19 @@
-import { and, asc, count, desc, eq, ilike, like, or } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  isNull,
+  like,
+  not,
+  or,
+} from "drizzle-orm";
 
-import type { RankType } from "@/lib/constants";
+import { RANK_TYPES, type RankType } from "@/lib/constants";
+import { DOUYIN_APP_ID_PREFIX } from "@/lib/douyin";
 import { usePostgres } from "@/lib/db/config";
 import { db, initDatabase, games, rankSnapshots } from "@/lib/db";
 import { getSqliteDb } from "@/lib/db/sqlite";
@@ -55,9 +68,11 @@ export async function ensureDb() {
 
 export async function getAvailableDates(): Promise<string[]> {
   await ensureDb();
+  // 仅微信榜日期，排除 dy:* 抖音快照，避免污染微信日期选择器
   const rows = (await db
     .selectDistinct({ date: rankSnapshots.snapshotDate })
     .from(rankSnapshots)
+    .where(inArray(rankSnapshots.rankType, [...RANK_TYPES]))
     .orderBy(desc(rankSnapshots.snapshotDate))) as Array<{ date: string }>;
   return rows.map((row) => row.date);
 }
@@ -585,7 +600,22 @@ type SearchGameRow = {
   iconUrl: string | null;
 };
 
-export async function searchGames(query: string, limit = 10) {
+export type SearchPlatform = "wechat" | "douyin";
+
+function searchPlatformFilter(platform: SearchPlatform) {
+  const dyPattern = `${DOUYIN_APP_ID_PREFIX}%`;
+  if (platform === "douyin") {
+    return like(games.appId, dyPattern);
+  }
+  // 微信：排除 dy: 前缀（含 appId 为空的历史微信数据）
+  return or(isNull(games.appId), not(like(games.appId, dyPattern)));
+}
+
+export async function searchGames(
+  query: string,
+  limit = 10,
+  platform: SearchPlatform = "wechat",
+) {
   await ensureDb();
   const q = query.trim();
   if (!q) return [];
@@ -600,6 +630,8 @@ export async function searchGames(query: string, limit = 10) {
   const appIdMatch = usePostgres()
     ? ilike(games.appId, pattern)
     : like(games.appId, pattern);
+  const platformMatch = searchPlatformFilter(platform);
+  const textMatch = or(nameMatch, publisherMatch, appIdMatch);
 
   const sqlHits = (await db
     .select({
@@ -611,7 +643,7 @@ export async function searchGames(query: string, limit = 10) {
       iconUrl: games.iconUrl,
     })
     .from(games)
-    .where(or(nameMatch, publisherMatch, appIdMatch))
+    .where(and(textMatch, platformMatch))
     .limit(limit)) as SearchGameRow[];
 
   const { looksLikePinyinQuery, matchesPinyin } = await import(
@@ -632,7 +664,8 @@ export async function searchGames(query: string, limit = 10) {
       category: games.category,
       iconUrl: games.iconUrl,
     })
-    .from(games)) as SearchGameRow[];
+    .from(games)
+    .where(platformMatch)) as SearchGameRow[];
 
   const seen = new Set(sqlHits.map((row) => row.id));
   const pinyinHits: SearchGameRow[] = [];

@@ -7,24 +7,32 @@ import { Tabs, tabTriggerClassName } from "@/components/ui/tabs";
 import { RANK_TYPES, RANK_TYPE_LABELS, type RankType } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
-interface RankTypeTabsProps {
-  activeType: RankType;
+interface RankTypeTabsProps<T extends string = RankType> {
+  activeType: T;
   mode?: "path" | "query";
   basePath?: string;
+  /** 自定义榜类型（如抖音）；默认微信 RANK_TYPES */
+  types?: readonly T[];
+  labels?: Record<T, string>;
 }
 
-export function RankTypeTabs({
+export function RankTypeTabs<T extends string = RankType>({
   activeType,
   mode = "path",
   basePath,
-}: RankTypeTabsProps) {
+  types,
+  labels,
+}: RankTypeTabsProps<T>) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const date = searchParams.get("date");
+  const rankTypes = types ?? (RANK_TYPES as unknown as readonly T[]);
+  const rankLabels =
+    labels ?? (RANK_TYPE_LABELS as unknown as Record<T, string>);
 
   return (
     <Tabs>
-      {RANK_TYPES.map((type) => {
+      {rankTypes.map((type) => {
         let href = "";
         if (mode === "query") {
           const params = new URLSearchParams(searchParams.toString());
@@ -46,7 +54,7 @@ export function RankTypeTabs({
               "flex-1 md:flex-none",
             )}
           >
-            {RANK_TYPE_LABELS[type]}
+            {rankLabels[type] ?? type}
           </Link>
         );
       })}

@@ -25,6 +25,8 @@ interface RankTableProps {
   className?: string;
   /** 嵌入父级 Card，不再套一层边框 */
   embedded?: boolean;
+  /** 游戏详情路径前缀，默认微信 /games；抖音传 /douyin/games */
+  gameHrefPrefix?: string;
 }
 
 function RankNumber({ rank }: { rank: number }) {
@@ -43,7 +45,15 @@ function RankNumber({ rank }: { rank: number }) {
 }
 
 /** 桌面端表格（md+） */
-export function RankTableDesktop({ items }: { items: RankEntry[] }) {
+export function RankTableDesktop({
+  items,
+  gameHrefPrefix = "/games",
+}: {
+  items: RankEntry[];
+  gameHrefPrefix?: string;
+}) {
+  const prefix = gameHrefPrefix.replace(/\/$/, "");
+
   return (
     <RankTableShell>
       <colgroup>
@@ -80,7 +90,7 @@ export function RankTableDesktop({ items }: { items: RankEntry[] }) {
                   />
                   <div className="min-w-0 flex-1 pt-0.5">
                     <Link
-                      href={`/games/${item.gameId}`}
+                      href={`${prefix}/${item.gameId}`}
                       className={cn("block leading-5", textLinkClass)}
                     >
                       <EllipsisText>{item.name}</EllipsisText>
@@ -124,7 +134,12 @@ export function RankTableDesktop({ items }: { items: RankEntry[] }) {
   );
 }
 
-export function RankTable({ items, className, embedded = false }: RankTableProps) {
+export function RankTable({
+  items,
+  className,
+  embedded = false,
+  gameHrefPrefix = "/games",
+}: RankTableProps) {
   if (items.length === 0) {
     return null;
   }
@@ -133,10 +148,10 @@ export function RankTable({ items, className, embedded = false }: RankTableProps
     return (
       <div className={className}>
         <div className="md:hidden">
-          <RankMobileList items={items} />
+          <RankMobileList items={items} gameHrefPrefix={gameHrefPrefix} />
         </div>
         <div className="hidden md:block">
-          <RankTableDesktop items={items} />
+          <RankTableDesktop items={items} gameHrefPrefix={gameHrefPrefix} />
         </div>
       </div>
     );
@@ -151,7 +166,7 @@ export function RankTable({ items, className, embedded = false }: RankTableProps
         )}
       >
         <CardContent className="p-0">
-          <RankMobileList items={items} />
+          <RankMobileList items={items} gameHrefPrefix={gameHrefPrefix} />
         </CardContent>
       </Card>
       <Card
@@ -161,7 +176,7 @@ export function RankTable({ items, className, embedded = false }: RankTableProps
         )}
       >
         <CardContent className="p-0">
-          <RankTableDesktop items={items} />
+          <RankTableDesktop items={items} gameHrefPrefix={gameHrefPrefix} />
         </CardContent>
       </Card>
     </>
