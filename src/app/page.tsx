@@ -8,7 +8,6 @@ import { EllipsisText } from "@/components/shared/ellipsis-text";
 import { CardPanelHeader } from "@/components/shared/card-panel-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
-import { StatCard } from "@/components/shared/stat-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { RANK_TYPE_LABELS } from "@/lib/constants";
 import { getDataSourceNote } from "@/lib/fetchers/rank-fetcher";
@@ -27,9 +26,6 @@ export const metadata = createPageMetadata(SEO_PAGE_COPY.home);
 export default async function HomePage() {
   const {
     latestDate,
-    totalGames,
-    newEntriesCount,
-    date,
     bestsellerItems,
     risingItems,
   } = await getHomePageData("bestseller");
@@ -49,22 +45,6 @@ export default async function HomePage() {
       ) : (
         <>
           <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <StatCard
-              label="最新数据日期"
-              value={latestDate}
-              hint="指标每天更新"
-            />
-            <StatCard
-              label="追踪游戏数"
-              value={totalGames}
-              hint="已入库的小游戏数量"
-            />
-            <StatCard
-              label="今日新上榜"
-              value={newEntriesCount}
-              hint={`${RANK_TYPE_LABELS.bestseller} · ${date}`}
-            />
-
             <RankTablePanel
               className="md:col-span-2 lg:col-span-2"
               mobileCards
