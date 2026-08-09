@@ -4,6 +4,7 @@ import { Suspense } from "react";
 
 import { UmamiAnalytics } from "@/components/analytics/umami-analytics";
 import { AppShell } from "@/components/layout/app-shell";
+import { BfCacheRefresh } from "@/components/layout/bfcache-refresh";
 import { RouteLoadingBar } from "@/components/layout/route-loading-bar";
 import { SiteJsonLd } from "@/components/seo/site-json-ld";
 import { createRootMetadata } from "@/lib/site-seo";
@@ -44,6 +45,7 @@ export default function RootLayout({
     >
       <body className="min-h-full">
         <SiteJsonLd />
+        <BfCacheRefresh />
         <Suspense fallback={null}>
           <RouteLoadingBar />
         </Suspense>
