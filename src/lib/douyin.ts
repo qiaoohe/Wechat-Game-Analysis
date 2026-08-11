@@ -40,6 +40,7 @@ export const DOUYIN_CONSOLE_RANK_TYPE_CODES: Record<DouyinRankType, number> = {
 };
 
 export const DOUYIN_PAGE_DESCRIPTIONS = {
+  overview: "热门榜 Top 10 与增速最快游戏一览（每天更新）",
   rankings:
     "依据访问用户量、广告与付费、新游表现及发行人场景营收等维度综合计算（每天更新）",
   rising: "按日环比、7 日变化与连续上升天数等指标综合计算（每天更新）",

@@ -1,6 +1,9 @@
 import type { MetadataRoute } from "next";
 
-import { DOUYIN_GAMES_PATH, DOUYIN_RANKINGS_PATH } from "@/lib/douyin";
+import {
+  DOUYIN_BASE_PATH,
+  DOUYIN_GAMES_PATH,
+} from "@/lib/douyin";
 import {
   getDouyinRankings,
   hasDouyinRankData,
@@ -21,7 +24,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${SITE_URL}${page.path === "/" ? "" : page.path}`,
       lastModified: new Date(),
       changeFrequency: page.path === "/" ? "daily" : "daily",
-      priority: page.path === "/" ? 1 : page.path === DOUYIN_RANKINGS_PATH ? 0.85 : 0.8,
+      priority:
+        page.path === "/" || page.path === DOUYIN_BASE_PATH
+          ? 1
+          : page.path.startsWith("/douyin")
+            ? 0.85
+            : 0.8,
     }),
   );
 

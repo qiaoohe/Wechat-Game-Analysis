@@ -8,16 +8,22 @@ import { cn } from "@/lib/utils";
 
 interface HomeRisingListProps {
   items: RisingGame[];
+  gameHrefPrefix?: string;
 }
 
 /** 首页增速榜 · 移动端卡片列表 */
-export function HomeRisingList({ items }: HomeRisingListProps) {
+export function HomeRisingList({
+  items,
+  gameHrefPrefix = "/games",
+}: HomeRisingListProps) {
+  const prefix = gameHrefPrefix.replace(/\/$/, "");
+
   return (
     <ul className="divide-y divide-slate-100">
       {items.map((item, index) => (
         <li key={item.gameId}>
           <Link
-            href={`/games/${item.gameId}`}
+            href={`${prefix}/${item.gameId}`}
             className="group flex items-center gap-3 px-4 py-3.5 active:bg-slate-50"
           >
             <span

@@ -12,6 +12,7 @@ interface RankTablePanelProps {
   className?: string;
   /** 首页移动端使用卡片列表，桌面端保持表格 */
   mobileCards?: boolean;
+  gameHrefPrefix?: string;
 }
 
 /** 标题 + 榜单表格合一卡片（首页等场景） */
@@ -21,6 +22,7 @@ export function RankTablePanel({
   items,
   className,
   mobileCards = false,
+  gameHrefPrefix = "/games",
 }: RankTablePanelProps) {
   return (
     <Card
@@ -34,15 +36,15 @@ export function RankTablePanel({
       {mobileCards ? (
         <>
           <div className="min-h-0 flex-1 overflow-hidden md:hidden">
-            <RankMobileList items={items} />
+            <RankMobileList items={items} gameHrefPrefix={gameHrefPrefix} />
           </div>
           <div className="hidden min-h-0 flex-1 overflow-hidden md:block">
-            <RankTableDesktop items={items} />
+            <RankTableDesktop items={items} gameHrefPrefix={gameHrefPrefix} />
           </div>
         </>
       ) : (
         <div className="min-h-0 flex-1">
-          <RankTable embedded items={items} />
+          <RankTable embedded items={items} gameHrefPrefix={gameHrefPrefix} />
         </div>
       )}
     </Card>

@@ -34,6 +34,7 @@ export const WECHAT_NAV_ITEMS: readonly NavItem[] = [
 
 /** 抖音平台主导航（仅展示已上线能力） */
 export const DOUYIN_NAV_ITEMS: readonly NavItem[] = [
+  { href: "/douyin", label: "概览", description: "数据概览与热门榜 Top 10" },
   {
     href: "/douyin/rankings",
     label: "榜单",
@@ -56,7 +57,7 @@ export const PLATFORM_SWITCH_ITEMS = [
   {
     id: "douyin" as const,
     label: "抖音",
-    href: "/douyin/rankings",
+    href: "/douyin",
   },
 ] as const;
 
@@ -69,11 +70,12 @@ export function getNavItems(platform: SitePlatform): readonly NavItem[] {
 }
 
 export function getPlatformHomeHref(platform: SitePlatform): string {
-  return platform === "douyin" ? "/douyin/rankings" : "/";
+  return platform === "douyin" ? "/douyin" : "/";
 }
 
 export function isNavActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
+  if (href === "/douyin") return pathname === "/douyin";
   // 抖音游戏详情归属「榜单」高亮
   if (href === "/douyin/rankings") {
     return (

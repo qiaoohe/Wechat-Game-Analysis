@@ -332,6 +332,41 @@ export async function getDouyinRisingGames(
   };
 }
 
+export interface DouyinHomePageData {
+  latestDate: string | null;
+  date: string;
+  popularItems: RankEntry[];
+  risingItems: RisingGame[];
+}
+
+/** 抖音概览页聚合：热门榜 Top + 增速 Top */
+export async function getDouyinHomePageData(
+  rankType: DouyinRankType = "popular",
+): Promise<DouyinHomePageData> {
+  await ensureDb();
+  const dates = await getDouyinAvailableDates();
+  const latestDate = dates[0] ?? null;
+
+  if (!latestDate) {
+    return {
+      latestDate: null,
+      date: "",
+      popularItems: [],
+      risingItems: [],
+    };
+  }
+
+  const rankingsResult = await getDouyinRankings(rankType, latestDate, dates);
+  const risingResult = await getDouyinRisingGames(rankType, latestDate, 10);
+
+  return {
+    latestDate,
+    date: rankingsResult.date,
+    popularItems: rankingsResult.items,
+    risingItems: risingResult.items,
+  };
+}
+
 export async function getDouyinGameById(
   gameId: number,
 ): Promise<DouyinGame | null> {

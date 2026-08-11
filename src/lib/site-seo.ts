@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { PAGE_DESCRIPTIONS } from "@/lib/constants";
 import {
+  DOUYIN_BASE_PATH,
   DOUYIN_PAGE_DESCRIPTIONS,
   DOUYIN_RANKINGS_PATH,
   DOUYIN_RISING_PATH,
@@ -69,8 +70,13 @@ export const SEO_PAGE_COPY = {
     description: `${PAGE_DESCRIPTIONS.ipTrends} 在 ${BRAND_NAME} 追踪微信小游戏合作 IP 的热度变化与行业趋势。`,
     path: "/insights/ip-trends",
   },
-  douyinRankings: {
+  douyinHome: {
     title: DOUYIN_SITE_NAME_ZH,
+    description: DOUYIN_SITE_DESCRIPTION,
+    path: DOUYIN_BASE_PATH,
+  },
+  douyinRankings: {
+    title: "小游戏榜单",
     description: `${DOUYIN_PAGE_DESCRIPTIONS.rankings} 在 ${BRAND_NAME} 查询抖音小游戏热门榜、畅销榜、新游榜、发行人热度榜完整排名与历史数据。`,
     path: DOUYIN_RANKINGS_PATH,
   },
@@ -181,7 +187,7 @@ interface CreateDouyinPageMetadataOptions {
 export function createDouyinPageMetadata({
   title,
   description,
-  path = DOUYIN_RANKINGS_PATH,
+  path = DOUYIN_BASE_PATH,
   noIndex = false,
   keywords = DOUYIN_KEYWORDS,
 }: CreateDouyinPageMetadataOptions): Metadata {
