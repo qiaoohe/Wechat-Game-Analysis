@@ -70,18 +70,30 @@ export function AdminDashboard({ usingDefaults, username }: AdminDashboardProps)
   const [busy, setBusy] = useState(false);
 
   const loadClients = useCallback(async () => {
-    const res = await fetch("/api/admin/clients");
-    if (res.status === 401) {
-      router.replace("/admin/login");
-      return;
+    try {
+      const res = await fetch("/api/admin/clients", { cache: "no-store" });
+      if (res.status === 401) {
+        router.replace("/admin/login");
+        return;
+      }
+      if (!res.ok) return;
+      const data = (await res.json()) as { clients?: ClientReportConfig[] };
+      setClients(data.clients ?? []);
+    } catch {
+      // 保留现有列表，避免刷新失败把左侧清空
     }
-    const data = (await res.json()) as { clients?: ClientReportConfig[] };
-    setClients(data.clients ?? []);
   }, [router]);
 
   useEffect(() => {
     void loadClients();
   }, [loadClients]);
+
+  function mergeClientIntoList(client: ClientReportConfig) {
+    setClients((prev) => {
+      const rest = prev.filter((c) => c.clientId !== client.clientId);
+      return [client, ...rest];
+    });
+  }
 
   async function selectClient(client: ClientReportConfig) {
     setSelectedId(client.clientId);
@@ -134,6 +146,7 @@ export function AdminDashboard({ usingDefaults, username }: AdminDashboardProps)
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(config),
+        cache: "no-store",
       });
       const data = (await res.json()) as {
         error?: string;
@@ -143,8 +156,12 @@ export function AdminDashboard({ usingDefaults, username }: AdminDashboardProps)
         setError(data.error || "保存失败");
         return;
       }
-      setMessage(`已保存：${data.client?.clientName}`);
-      if (data.client) await selectClient(data.client);
+      const saved = data.client ?? config;
+      setMessage(`已保存：${saved.clientName}`);
+      // 先本地插入/更新左侧列表，再后台刷新，避免列表「看起来没更新」
+      mergeClientIntoList(saved);
+      setSelectedId(saved.clientId);
+      await selectClient(saved);
       await loadClients();
     } catch {
       setError("保存失败");

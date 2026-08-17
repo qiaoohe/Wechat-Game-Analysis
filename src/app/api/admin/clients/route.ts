@@ -8,12 +8,21 @@ import {
 import { requireAdminApi } from "@/lib/admin/session";
 import type { ClientReportConfig } from "@/lib/reports/types";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const { error } = await requireAdminApi();
   if (error) return error;
 
-  const clients = await listReportClients();
-  return NextResponse.json({ clients });
+  try {
+    const clients = await listReportClients();
+    return NextResponse.json({ clients });
+  } catch (e) {
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "读取客户失败", clients: [] },
+      { status: 500 },
+    );
+  }
 }
 
 export async function POST(request: Request) {

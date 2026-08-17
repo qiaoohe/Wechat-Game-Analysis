@@ -5,7 +5,6 @@ import { getSqliteDb, initSqliteDatabase, sqliteSchema } from "./sqlite";
 export type AppDb = ReturnType<typeof getPostgresDb> | ReturnType<typeof getSqliteDb>;
 
 let dbInstance: AppDb | null = null;
-let initialized = false;
 
 function createDb(): AppDb {
   return usePostgres() ? getPostgresDb() : getSqliteDb();
@@ -29,15 +28,12 @@ export const db: any = new Proxy({} as AppDb, {
 });
 
 export async function initDatabase() {
-  if (initialized) return;
-
+  // CREATE IF NOT EXISTS 可重复执行；避免热更新后跳过导致新表未建
   if (usePostgres()) {
     await initPostgresDatabase();
   } else {
     initSqliteDatabase();
   }
-
-  initialized = true;
 }
 
 export function getDatabaseInfo() {
