@@ -146,3 +146,58 @@
     opacity: 1;
   }
 }
+
+/* /pro 落地页：轻量入场 */
+@keyframes pro-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pro-rise {
+  animation: pro-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.pro-rise-delay-1 {
+  animation-delay: 0.08s;
+}
+
+.pro-rise-delay-2 {
+  animation-delay: 0.16s;
+}
+
+.pro-rise-delay-3 {
+  animation-delay: 0.24s;
+}
+
+@keyframes pro-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.pro-modal-in {
+  animation: pro-modal-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pro-rise,
+  .pro-rise-delay-1,
+  .pro-rise-delay-2,
+  .pro-rise-delay-3,
+  .pro-modal-in {
+    animation: none;
+  }
+}

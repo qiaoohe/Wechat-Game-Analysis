@@ -70,6 +70,11 @@ export const SEO_PAGE_COPY = {
     description: `${PAGE_DESCRIPTIONS.ipTrends} 在 ${BRAND_NAME} 追踪微信小游戏合作 IP 的热度变化与行业趋势。`,
     path: "/insights/ip-trends",
   },
+  pro: {
+    title: "专属小游戏情报助理",
+    description: `${BRAND_NAME}：按你的名单盯榜、盯竞品，异动雷达与周判断专属交付，工作日 1 对 1 在线管家。单端 ¥999/月，双端 ¥1599/月。`,
+    path: "/pro",
+  },
   douyinHome: {
     title: DOUYIN_SITE_NAME_ZH,
     description: DOUYIN_SITE_DESCRIPTION,

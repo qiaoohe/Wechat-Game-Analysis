@@ -149,6 +149,19 @@ export function MobileNavMenu() {
                     );
                   })}
                 </ul>
+
+                <div className="mt-4 border-t border-slate-100 pt-4">
+                  <Link
+                    href="/pro"
+                    onClick={close}
+                    className="block rounded-xl bg-brand px-3 py-3.5 text-center text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-hover"
+                  >
+                    开通专属情报助理
+                  </Link>
+                  <p className="mt-2 text-center text-xs leading-5 text-slate-500">
+                    按名单盯榜 · 工作日 1 对 1 管家
+                  </p>
+                </div>
               </div>
             </nav>
           </div>,

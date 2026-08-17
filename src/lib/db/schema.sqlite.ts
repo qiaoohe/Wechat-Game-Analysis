@@ -46,7 +46,15 @@ export const insightSnapshots = sqliteTable(
   (table) => [unique().on(table.insightType, table.dataDate)],
 );
 
+export const reportClients = sqliteTable("report_clients", {
+  clientId: text("client_id").primaryKey(),
+  clientName: text("client_name").notNull(),
+  configJson: text("config_json").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
 export type Game = typeof games.$inferSelect;
 export type RankSnapshot = typeof rankSnapshots.$inferSelect;
 export type FetchLog = typeof fetchLogs.$inferSelect;
 export type InsightSnapshot = typeof insightSnapshots.$inferSelect;
+export type ReportClient = typeof reportClients.$inferSelect;

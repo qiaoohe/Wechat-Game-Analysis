@@ -40,3 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 # local database
 /data/
+
+# generated client reports
+/reports/out/
+
+# local Vercel env dump (secrets)
+vercel-env-copy.txt

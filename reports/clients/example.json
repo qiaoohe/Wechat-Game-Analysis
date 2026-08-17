@@ -1,0 +1,9 @@
+{
+  "clientId": "example",
+  "clientName": "示例客户",
+  "platform": "wechat",
+  "rankType": "bestseller",
+  "watchGames": [1, "咸鱼之王"],
+  "competitors": [3, "这城有良田"],
+  "notes": "试点合作 · 单端微信"
+}

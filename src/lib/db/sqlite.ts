@@ -70,6 +70,13 @@ export function initSqliteDatabase() {
 
     CREATE INDEX IF NOT EXISTS idx_insight_snapshots_type_date
     ON insight_snapshots(insight_type, data_date DESC);
+
+    CREATE TABLE IF NOT EXISTS report_clients (
+      client_id TEXT PRIMARY KEY,
+      client_name TEXT NOT NULL,
+      config_json TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
   `);
 
   try {

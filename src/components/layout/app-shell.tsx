@@ -18,6 +18,11 @@ import { cn, linkHoverClass } from "@/lib/utils";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+
+  if (pathname.startsWith("/admin")) {
+    return <div className="min-h-screen bg-[var(--background)]">{children}</div>;
+  }
+
   const platform = getSitePlatform(pathname);
   const navItems = getNavItems(platform);
   const homeHref = getPlatformHomeHref(platform);
@@ -74,9 +79,29 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </Link>
               );
             })}
+            <Link
+              href="/pro"
+              className={cn(
+                "ml-1 inline-flex h-9 items-center whitespace-nowrap rounded-lg bg-brand px-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-hover",
+                pathname.startsWith("/pro") && "ring-2 ring-brand-ring ring-offset-1",
+              )}
+            >
+              情报助理
+            </Link>
           </nav>
 
-          <MobileNavMenu />
+          <div className="ml-auto flex items-center gap-1.5 md:ml-0 md:contents">
+            <Link
+              href="/pro"
+              className={cn(
+                "inline-flex h-8 items-center rounded-lg bg-brand px-2.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-brand-hover md:hidden",
+                pathname.startsWith("/pro") && "ring-2 ring-brand-ring ring-offset-1",
+              )}
+            >
+              助理
+            </Link>
+            <MobileNavMenu />
+          </div>
         </div>
       </header>
 

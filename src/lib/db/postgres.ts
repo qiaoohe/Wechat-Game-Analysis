@@ -91,6 +91,15 @@ export async function initPostgresDatabase() {
     ALTER TABLE rank_snapshots
     ADD COLUMN IF NOT EXISTS rank_labels TEXT
   `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS report_clients (
+      client_id TEXT PRIMARY KEY,
+      client_name TEXT NOT NULL,
+      config_json TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `;
 }
 
 export { schema as pgSchema };

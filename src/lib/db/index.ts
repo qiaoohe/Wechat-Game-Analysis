@@ -52,5 +52,12 @@ export const games = activeSchema.games;
 export const rankSnapshots = activeSchema.rankSnapshots;
 export const fetchLogs = activeSchema.fetchLogs;
 export const insightSnapshots = activeSchema.insightSnapshots;
+export const reportClients = activeSchema.reportClients;
 
-export type { Game, RankSnapshot, FetchLog, InsightSnapshot } from "./schema.pg";
+export type {
+  Game,
+  RankSnapshot,
+  FetchLog,
+  InsightSnapshot,
+  ReportClient,
+} from "./schema.pg";
